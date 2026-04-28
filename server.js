@@ -3,6 +3,7 @@
 // DEMO_MODE uses in-memory storage — no Firebase required
 // Set DEMO_MODE = false and configure Firebase for production
 
+require('dotenv').config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
