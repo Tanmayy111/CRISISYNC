@@ -5,11 +5,12 @@
 
 const express = require("express");
 const cors = require("cors");
+const path = require("path");
 
 const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
-app.use(express.static("frontend"));
+app.use(express.static(path.join(__dirname, "frontend")));
 app.get('/', (req, res) => res.redirect('/dashboard.html'));
 
 // ─── Configuration ──────────────────────────────────────────────────────────
@@ -574,24 +575,28 @@ app.get("/api/health", (req, res) => {
 
 // ─── Start Server ───────────────────────────────────────────────────────────
 
-app.listen(PORT, () => {
-  console.log(`
-╔══════════════════════════════════════════════════╗
-║       CrisisSync Server — Port ${PORT}             ║
-║       Mode: ${DEMO_MODE ? "DEMO (in-memory)" : "PRODUCTION (Firebase)"}          ║
-╚══════════════════════════════════════════════════╝
-  `);
-  console.log("Endpoints:");
-  console.log("  POST /api/alert              — Receive SOS alerts");
-  console.log("  GET  /api/incidents           — List incidents");
-  console.log("  GET  /api/incidents/:id        — Get single incident");
-  console.log("  PATCH /api/incidents/:id/status — Update status");
-  console.log("  POST /api/ai/assign           — AI responder assignment");
-  console.log("  POST /api/ai/report           — AI report generation");
-  console.log("  POST /api/ai/chat             — AI responder assistant");
-  console.log("  POST /api/ai/crowd            — AI crowd suggestions");
-  console.log("  GET  /api/crowdsense/zones     — Crowd zone data");
-  console.log("  GET  /api/responders           — List responders");
-  console.log("  GET  /api/health               — Health check");
-  console.log("");
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`
+  ╔══════════════════════════════════════════════════╗
+  ║       CrisisSync Server — Port ${PORT}             ║
+  ║       Mode: ${DEMO_MODE ? "DEMO (in-memory)" : "PRODUCTION (Firebase)"}          ║
+  ╚══════════════════════════════════════════════════╝
+    `);
+    console.log("Endpoints:");
+    console.log("  POST /api/alert              — Receive SOS alerts");
+    console.log("  GET  /api/incidents           — List incidents");
+    console.log("  GET  /api/incidents/:id        — Get single incident");
+    console.log("  PATCH /api/incidents/:id/status — Update status");
+    console.log("  POST /api/ai/assign           — AI responder assignment");
+    console.log("  POST /api/ai/report           — AI report generation");
+    console.log("  POST /api/ai/chat             — AI responder assistant");
+    console.log("  POST /api/ai/crowd            — AI crowd suggestions");
+    console.log("  GET  /api/crowdsense/zones     — Crowd zone data");
+    console.log("  GET  /api/responders           — List responders");
+    console.log("  GET  /api/health               — Health check");
+    console.log("");
+  });
+}
+
+module.exports = app;
