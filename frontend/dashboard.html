@@ -1,0 +1,1794 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CrisisSync Command Centre</title>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600;700&display=swap"
+    rel="stylesheet" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface-1: #141414;
+      --surface-2: #1c1c1c;
+      --red: #dc2626;
+      --amber: #f59e0b;
+      --amber-dk: #d97706;
+      --amber-lt: #fbbf24;
+      --green: #16a34a;
+      --text-main: #ffffff;
+      --text-muted: rgba(255, 255, 255, 0.6);
+      --border: rgba(255, 255, 255, 0.08);
+      --border-focus: var(--amber);
+      --radius: 12px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-main);
+      font-family: 'Barlow', sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .condensed {
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    .uppercase {
+      text-transform: uppercase;
+    }
+
+    .muted {
+      color: var(--text-muted);
+    }
+
+    .italic {
+      font-style: italic;
+    }
+
+    button {
+      font-family: 'Barlow Condensed', sans-serif;
+      cursor: pointer;
+      border: none;
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-amber {
+      background: var(--amber);
+      color: #000;
+    }
+
+    .btn-amber:hover {
+      background: var(--amber-lt);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-outline:hover {
+      border-color: var(--text-muted);
+    }
+
+    .btn-green {
+      background: var(--green);
+      color: #fff;
+    }
+
+    /* Layout */
+    .header {
+      height: 64px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 24px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface-1);
+      flex-shrink: 0;
+    }
+
+    .main-wrap {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .panel-left {
+      width: 38%;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: var(--surface-1);
+    }
+
+    .panel-right {
+      width: 62%;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      background: var(--bg);
+    }
+
+    @media (max-width: 768px) {
+      .main-wrap {
+        flex-direction: column;
+      }
+
+      .panel-left,
+      .panel-right {
+        width: 100%;
+        flex: 1;
+      }
+    }
+
+    /* Header Elements */
+    .brand {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-title {
+      color: var(--amber);
+      font-size: 24px;
+      letter-spacing: 4px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      margin-top: 2px;
+    }
+
+    .status-pill-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-pill {
+      padding: 8px 16px;
+      border-radius: 30px;
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-pill.red {
+      border-color: var(--red);
+      color: var(--red);
+      animation: pulse-red 2s infinite;
+    }
+
+    .status-pill.amber {
+      border-color: var(--amber);
+      color: var(--amber);
+    }
+
+    .status-pill.green {
+      border-color: var(--green);
+      color: var(--green);
+    }
+
+    @keyframes pulse-red {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(220, 38, 38, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+      }
+    }
+
+    .time-wrap {
+      text-align: right;
+      font-size: 18px;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      justify-content: flex-end;
+    }
+
+    .dot-live {
+      width: 6px;
+      height: 6px;
+      background: var(--green);
+      border-radius: 50%;
+      animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+
+      0%,
+      100% {
+        opacity: 1;
+      }
+
+      50% {
+        opacity: 0.3;
+      }
+    }
+
+    /* Left Panel */
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab.active {
+      color: var(--amber);
+      border-bottom-color: var(--amber);
+    }
+
+    .tab-count {
+      background: var(--surface-2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      font-size: 12px;
+      margin-left: 6px;
+    }
+
+    .incident-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .inc-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 4px solid transparent;
+      animation: slide-down 0.4s ease-out;
+    }
+
+    @keyframes slide-down {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .inc-card:hover {
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .inc-card.selected {
+      border-left-color: var(--amber);
+      background: #222;
+    }
+
+    .inc-card-top {
+      display: flex;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    .bdg-sev {
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      margin-right: 8px;
+    }
+
+    .bdg-sev.high {
+      background: rgba(220, 38, 38, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    .bdg-sev.medium {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .bdg-sev.low {
+      background: rgba(22, 163, 74, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(22, 163, 74, 0.3);
+    }
+
+    .inc-type {
+      font-size: 16px;
+      font-weight: 700;
+      flex: 1;
+    }
+
+    .inc-time {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .inc-loc {
+      font-size: 13px;
+      color: #ccc;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .inc-card-bot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .bdg-status {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.05);
+    }
+
+    .bdg-status.active {
+      color: #f87171;
+    }
+
+    .bdg-status.acknowledged {
+      color: #fbbf24;
+    }
+
+    .bdg-status.resolved {
+      color: #4ade80;
+    }
+
+    .inc-id {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+
+    .inc-card.history-mode {
+      opacity: 0.6;
+    }
+
+    .inc-card.history-mode:hover {
+      opacity: 1;
+    }
+
+    /* Right Panel Details */
+    .detail-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      gap: 16px;
+    }
+
+    .detail-placeholder svg {
+      width: 64px;
+      height: 64px;
+      fill: var(--amber);
+      opacity: 0.3;
+    }
+
+    .detail-content {
+      display: none;
+      padding: 32px;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .detail-content.show {
+      display: flex;
+    }
+
+    .d-header {
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 24px;
+    }
+
+    .dt-wrap {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 16px;
+    }
+
+    .d-title {
+      font-size: 36px;
+      line-height: 1;
+      margin-bottom: 8px;
+      letter-spacing: 1px;
+    }
+
+    .d-badges {
+      display: flex;
+      gap: 12px;
+    }
+
+    .d-id-time {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: monospace;
+      text-align: right;
+    }
+
+    .d-section {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+    }
+
+    .sec-title {
+      font-size: 14px;
+      letter-spacing: 1.5px;
+      color: var(--amber);
+      margin-bottom: 16px;
+    }
+
+    .loc-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .loc-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .loc-lbl {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .loc-val {
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .desc-text {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #e5e5e5;
+    }
+
+    /* Timeline */
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      position: relative;
+      padding-left: 20px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 5px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--amber);
+      opacity: 0.3;
+    }
+
+    .tl-item {
+      position: relative;
+    }
+
+    .tl-item::before {
+      content: '';
+      position: absolute;
+      left: -19px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--amber);
+    }
+
+    .tl-main {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .tl-sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    /* Responder Block */
+    .responder-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .resp-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .resp-av {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: var(--amber);
+    }
+
+    .resp-meta {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .resp-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .resp-role {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .resp-acts {
+      display: flex;
+      gap: 8px;
+    }
+
+    .ai-rec {
+      margin-top: 16px;
+      padding: 12px;
+      background: rgba(245, 158, 11, 0.1);
+      border-left: 3px solid var(--amber);
+      border-radius: 0 8px 8px 0;
+      font-size: 13px;
+      display: none;
+    }
+
+    /* Dispatch Panel */
+    .dispatch-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .dispatch-row:last-child {
+      border-bottom: none;
+    }
+
+    .dispatch-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .dispatch-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .dispatch-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+
+    .dispatch-num {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .dispatch-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bdg-disp {
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+
+    .bdg-disp.standby {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text-muted);
+    }
+
+    .bdg-disp.notified {
+      background: rgba(220, 38, 38, 0.15);
+      color: var(--red);
+      border: 1px solid rgba(220, 38, 38, 0.3);
+    }
+
+    /* Action Buttons */
+    .action-btns {
+      display: flex;
+      gap: 12px;
+      margin-top: auto;
+    }
+
+    .action-btns button {
+      flex: 1;
+      padding: 16px;
+      font-size: 18px;
+    }
+
+    /* Leaflet Map */
+    .map-wrap {
+      height: 300px;
+      border-radius: var(--radius);
+      overflow: hidden;
+      border: 1px solid var(--border);
+      margin-top: 24px;
+      position: relative;
+    }
+
+    #gm-panel {
+      width: 100%;
+      height: 100%;
+      background: #111;
+      z-index: 1;
+    }
+
+    .map-hdr {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--amber);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      z-index: 1000;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .custom-marker {
+      border-radius: 50%;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Report Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 2000;
+    }
+
+    .modal {
+      background: var(--surface-1);
+      padding: 24px;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      width: 800px;
+      max-width: 95%;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .report-content-box {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--surface-2);
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin: 16px 0;
+      font-family: monospace;
+      white-space: pre-wrap;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #e5e5e5;
+    }
+
+    /* Manual Assignment Modal */
+    .manual-modal-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+      max-height: 60vh;
+      overflow-y: auto;
+    }
+    .resp-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .resp-card:hover {
+      border-color: var(--amber);
+      background: rgba(245,158,11,0.08);
+      transform: translateY(-1px);
+    }
+    .resp-card.busy {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .resp-card.busy:hover {
+      border-color: var(--border);
+      background: var(--surface-2);
+      transform: none;
+    }
+    .resp-card-av {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 16px;
+      flex-shrink: 0;
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+    .resp-card-meta {
+      flex: 1;
+      min-width: 0;
+    }
+    .resp-card-name {
+      font-weight: 600;
+      font-size: 15px;
+      color: #fff;
+    }
+    .resp-card-role {
+      font-size: 12px;
+      color: rgba(255,255,255,0.5);
+      margin-top: 2px;
+    }
+    .resp-card-skills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      margin-top: 6px;
+    }
+    .skill-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.6);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .resp-card-busy {
+      font-size: 11px;
+      color: #ef4444;
+      font-weight: 600;
+      margin-top: 4px;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--green);
+      color: white;
+      padding: 12px 24px;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 14px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+      display: none;
+      z-index: 3000;
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+
+      #report-print-area,
+      #report-print-area * {
+        visibility: visible;
+      }
+
+      #report-print-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: black;
+        background: white;
+        padding: 20px;
+        font-family: sans-serif;
+        white-space: pre-wrap;
+        margin: 0;
+        border: none;
+      }
+    }
+
+    /* Crowd Monitor */
+    .crowd-panel {
+      border-top: 1px solid var(--border);
+      background: var(--surface-1);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .crowd-header {
+      padding: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--amber);
+      transition: background 0.2s;
+    }
+    
+    .crowd-header:hover { background: rgba(255, 255, 255, 0.02); }
+    
+    .crowd-body {
+      display: none;
+      padding: 16px;
+      background: #0a0a0a;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 400px;
+    }
+    
+    .crowd-body.show { display: flex; }
+    
+    .crowd-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    
+    .crowd-card {
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    
+    .crowd-card.high {
+      border-left: 4px solid var(--red);
+      background: rgba(220, 38, 38, 0.06);
+    }
+    
+    .crowd-c-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      font-family: 'Barlow Condensed', sans-serif;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #fff;
+    }
+    
+    .crowd-bar-bg {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    
+    .crowd-bar-fill {
+      height: 100%;
+      transition: width 0.3s, background 0.3s;
+    }
+    
+    .crowd-c-bot {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 11px;
+    }
+    
+    .crowd-risk { padding: 2px 6px; border-radius: 4px; font-weight: bold; }
+    .crowd-risk.low { background: rgba(22,163,74,0.2); color: #4ade80; }
+    .crowd-risk.medium { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .crowd-risk.high { background: rgba(220,38,38,0.2); color: #f87171; }
+    
+    .crowd-suggestion {
+      font-size: 11px;
+      color: var(--amber);
+      font-style: italic;
+      margin-top: 4px;
+      border-top: 1px dashed rgba(245,158,11,0.3);
+      padding-top: 4px;
+    }
+
+      .btn-sim-surge {
+        width: 100%;
+        background: transparent;
+        border: 1px solid var(--red);
+        color: var(--red);
+        margin-top: 8px;
+      }
+      .btn-sim-surge:hover { background: rgba(220, 38, 38, 0.1); }
+      
+      .crowd-toast {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: var(--amber);
+        color: #000;
+        padding: 12px 24px;
+        border-radius: 30px;
+        font-weight: bold;
+        font-size: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+        z-index: 3000;
+        display: none;
+      }
+
+    .inc-card.warning-mode {
+      border-left: 4px solid var(--amber);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- Report Modal -->
+  <div class="modal-overlay" id="report-modal">
+    <div class="modal">
+      <h2 class="condensed uppercase" style="color: var(--amber);">Incident Report</h2>
+      <div id="report-print-area" class="report-content-box">Generating report...</div>
+      <div style="display: flex; justify-content: space-between; gap: 12px;">
+        <button class="btn-outline"
+          onclick="document.getElementById('report-modal').style.display='none'">Close</button>
+        <div style="display: flex; gap: 12px;">
+          <button class="btn-green" onclick="sendReportToResponder()">Send to Responder</button>
+          <button class="btn-amber" onclick="window.print()">Download PDF</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Manual Assignment Modal -->
+  <div class="modal-overlay" id="manual-modal">
+    <div class="modal" style="width:580px;">
+      <h2 class="condensed uppercase" style="color: var(--amber);">Select Responder</h2>
+      <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-top:4px;" id="manual-modal-sub">Choose a responder to assign</p>
+      <div class="manual-modal-grid" id="manual-modal-grid"></div>
+      <button class="btn-outline" style="margin-top:8px;" onclick="document.getElementById('manual-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+  <div class="toast" id="toast-msg"></div>
+  <div class="crowd-toast" id="crowd-toast"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="brand">
+      <div class="brand-title condensed">CRISISSYNC</div>
+      <div class="brand-sub uppercase muted">Command Centre</div>
+    </div>
+
+    <div class="status-pill-wrap">
+      <button class="btn-outline muted" id="snooze-btn" style="display:none; font-size: 12px;"
+        onclick="snoozeHighAlarm()">SNOOZE 5 MIN</button>
+      <div class="status-pill green condensed uppercase" id="master-status">ALL CLEAR — SYSTEMS NORMAL</div>
+    </div>
+
+    <div class="time-wrap">
+      <div id="clock">00:00:00</div>
+      <div class="live-badge uppercase">
+        <div class="dot-live"></div> Live
+      </div>
+    </div>
+  </header>
+
+  <div class="main-wrap">
+    <!-- LEFT PANEL -->
+    <div class="panel-left">
+      <div class="tabs">
+        <div class="tab active condensed uppercase" onclick="setTab('ACTIVE')">Active <span class="tab-count"
+            id="count-active">0</span></div>
+        <div class="tab condensed uppercase" onclick="setTab('HISTORY')">History <span class="tab-count"
+            id="count-history">0</span></div>
+      </div>
+      <div class="incident-list" id="inc-list"></div>
+
+      <!-- CROWD MONITOR PANEL -->
+      <div class="crowd-panel">
+        <div class="crowd-header condensed" onclick="toggleCrowdPanel()">
+          <div style="display:flex; align-items:center; gap:8px;">
+            CROWD MONITOR <div class="dot-live" style="background:var(--amber);"></div>
+          </div>
+          <div class="tab-count" id="crowd-count">0</div>
+        </div>
+        <div class="crowd-body" id="crowd-body">
+          <div class="crowd-grid" id="crowd-grid"></div>
+          <button class="btn-sim-surge condensed uppercase" onclick="simulateRandomSurge()">Simulate Crowd Surge</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <div class="panel-right" id="panel-right">
+      <div class="detail-placeholder" id="det-placeholder">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2L1 21h22L12 2zm0 3.8l7.5 13.2H4.5L12 5.8zM11 10v4h2v-4h-2zm0 5v2h2v-2h-2z" />
+        </svg>
+        <div class="uppercase condensed" style="font-size: 18px; letter-spacing: 1px;">Select an incident to view
+          details</div>
+      </div>
+
+      <div class="detail-content" id="det-content">
+        <div class="d-header">
+          <div class="dt-wrap">
+            <div>
+              <div class="d-title condensed uppercase" id="d-type">INCIDENT TYPE</div>
+              <div class="d-badges" id="d-badges"></div>
+            </div>
+            <div class="d-id-time">
+              <div id="d-id">ID: </div>
+              <div id="d-time" style="margin-top: 8px;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-section">
+          <div class="sec-title condensed uppercase">Location & Details</div>
+          <div class="loc-grid">
+            <div class="loc-item"><span class="loc-lbl uppercase">Floor</span><span class="loc-val" id="d-floor"></span>
+            </div>
+            <div class="loc-item"><span class="loc-lbl uppercase">Area</span><span class="loc-val" id="d-area"></span>
+            </div>
+            <div class="loc-item"><span class="loc-lbl uppercase">Room</span><span class="loc-val" id="d-room"></span>
+            </div>
+            <div class="loc-item"><span class="loc-lbl uppercase">Device</span><span class="loc-val"
+                id="d-device"></span></div>
+            <div class="loc-item"><span class="loc-lbl uppercase">Silent Alert</span><span class="loc-val"
+                id="d-silent"></span></div>
+          </div>
+        </div>
+
+        <div class="d-section">
+          <div class="sec-title condensed uppercase">Description</div>
+          <div class="desc-text" id="d-desc"></div>
+        </div>
+
+        <div class="d-section">
+          <div class="sec-title condensed uppercase">Timeline</div>
+          <div class="timeline" id="d-tl"></div>
+          <button class="btn-amber condensed uppercase" style="margin-top: 16px; width: 100%;"
+            onclick="generateReport()">Generate Report</button>
+        </div>
+
+        <div class="d-section">
+          <div class="sec-title condensed uppercase">Responder Assignment</div>
+          <div class="responder-box">
+            <div class="resp-info" id="d-resp-info">
+              <div class="resp-av" id="d-resp-av">?</div>
+              <div class="resp-meta">
+                <span class="resp-name" id="d-resp-name">Unassigned</span>
+                <span class="resp-role" id="d-resp-role">Pending</span>
+              </div>
+            </div>
+            <div class="resp-acts" id="d-resp-acts">
+              <button class="btn-amber" onclick="assignAI()">AI Assign</button>
+              <button class="btn-outline" onclick="openManualModal()">Manual</button>
+            </div>
+          </div>
+          <div class="ai-rec" id="d-ai-rec"></div>
+        </div>
+
+        <div class="d-section">
+          <div class="sec-title condensed uppercase">Dispatch Status</div>
+          <div id="d-dispatch-list"></div>
+          <div id="d-dispatch-reason" class="muted italic" style="font-size: 13px; margin-top: 12px;"></div>
+        </div>
+
+        <div class="map-wrap">
+          <div class="map-hdr condensed">INCIDENT MAP <div class="dot-live"></div>
+          </div>
+          <div id="gm-panel"></div>
+        </div>
+
+        <div class="action-btns" id="d-actions"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const DEMO_MODE = true;
+    // Gemini is proxied through the server — no API key needed in the browser
+
+    let incidents = [
+      { incidentId: 'CS-A1B2C', type: 'FIRE', location: 'ROOM', locationDetail: '302', floor: '3', silent: false, description: 'Smoke detected near room 302', device: 'QR-SOS', timestamp: new Date(Date.now() - 5 * 60000).toISOString(), status: 'ACTIVE', severity: 'HIGH', assignedResponder: null, events: [{ type: 'REPORTED', time: new Date(Date.now() - 5 * 60000).toISOString(), actor: 'Guest' }], dispatch: {} },
+      { incidentId: 'CS-XYZ789', type: 'MEDICAL', location: 'POOL', locationDetail: null, floor: 'G', silent: false, description: 'Guest collapsed near pool area', device: 'QR-SOS', timestamp: new Date(Date.now() - 12 * 60000).toISOString(), status: 'ACKNOWLEDGED', severity: 'MEDIUM', assignedResponder: { id: 'R02', name: 'Priya Nair', role: 'Medical' }, events: [{ type: 'REPORTED', time: new Date(Date.now() - 12 * 60000).toISOString(), actor: 'Staff' }, { type: 'ACKNOWLEDGED', time: new Date(Date.now() - 10 * 60000).toISOString(), actor: 'Manager' }], dispatch: { ambulance: { notified: true, time: new Date(Date.now() - 10 * 60000).toISOString() } } },
+      { incidentId: 'CS-RES001', type: 'SECURITY', location: 'PARKING', locationDetail: null, floor: 'B1', silent: true, description: 'Suspicious individual in parking', device: 'WEB-SOS', timestamp: new Date(Date.now() - 60 * 60000).toISOString(), status: 'RESOLVED', severity: 'LOW', assignedResponder: { id: 'R01', name: 'Arjun Sharma', role: 'Security' }, events: [{ type: 'REPORTED', time: new Date(Date.now() - 60 * 60000).toISOString(), actor: 'Staff' }, { type: 'RESOLVED', time: new Date(Date.now() - 45 * 60000).toISOString(), actor: 'Arjun Sharma' }], dispatch: {} },
+      { incidentId: 'CS-RES002', type: 'ASSAULT', location: 'BAR', locationDetail: null, floor: '1', silent: false, description: 'Altercation reported at bar', device: 'QR-SOS', timestamp: new Date(Date.now() - 90 * 60000).toISOString(), status: 'RESOLVED', severity: 'HIGH', assignedResponder: { id: 'R05', name: 'Vikram Joshi', role: 'Security' }, events: [{ type: 'REPORTED', time: new Date(Date.now() - 90 * 60000).toISOString(), actor: 'Guest' }, { type: 'RESOLVED', time: new Date(Date.now() - 60 * 60000).toISOString(), actor: 'Vikram Joshi' }], dispatch: { police: { notified: true, time: new Date(Date.now() - 85 * 60000).toISOString() } } }
+    ];
+
+    const RESPONDERS = [
+      { id: 'R01', name: 'Arjun Sharma', role: 'Security', skills: ['SECURITY', 'ASSAULT', 'EVACUATION'] },
+      { id: 'R02', name: 'Priya Nair', role: 'Medical', skills: ['MEDICAL'] },
+      { id: 'R03', name: 'Ramesh Gupta', role: 'Fire Safety', skills: ['FIRE', 'EVACUATION'] },
+      { id: 'R04', name: 'Sneha Verma', role: 'General Staff', skills: ['OTHER', 'EVACUATION'] },
+      { id: 'R05', name: 'Vikram Joshi', role: 'Security', skills: ['SECURITY', 'ASSAULT'] }
+    ];
+
+    /* --- STATE --- */
+    let currentTab = 'ACTIVE';
+    let selIncId = null;
+
+    /* --- CLOCK --- */
+    setInterval(() => { document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-IN'); }, 1000);
+
+    /* --- AUDIO SYSTEM --- */
+    let audioCtx = null;
+    let alarmInterval = null;
+    let snoozeUntil = 0;
+
+    function initAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
+    document.body.addEventListener('click', () => { initAudio(); if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume(); }, { once: true });
+
+    function playTone(freq, type, duration) {
+      if (!audioCtx) return;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(); osc.stop(audioCtx.currentTime + duration);
+    }
+
+    function playHighAlarm() { playTone(800, 'square', 0.2); setTimeout(() => playTone(1200, 'square', 0.4), 200); }
+    function playMediumAlarm() { playTone(600, 'sine', 0.2); setTimeout(() => playTone(600, 'sine', 0.2), 300); }
+    function playLowAlarm() { playTone(400, 'triangle', 0.5); }
+
+    function playSound(severity) {
+      if (severity === 'HIGH' && Date.now() > snoozeUntil) {
+        playHighAlarm();
+        if (!alarmInterval) alarmInterval = setInterval(playHighAlarm, 8000);
+      } else if (severity === 'MEDIUM') { playMediumAlarm(); }
+      else if (severity === 'LOW') { playLowAlarm(); }
+    }
+
+    function stopHighAlarm() { clearInterval(alarmInterval); alarmInterval = null; }
+    function snoozeHighAlarm() { snoozeUntil = Date.now() + 5 * 60000; stopHighAlarm(); refreshMasterStatus(); }
+
+    /* --- CROWD LOGIC --- */
+    function refreshCrowdPanel(zones) {
+      const highZones = zones.filter(z => z.riskLevel === 'HIGH');
+      document.getElementById('crowd-count').textContent = highZones.length;
+      const grid = document.getElementById('crowd-grid');
+      let html = '';
+
+      zones.forEach(z => {
+        let barColor = z.riskLevel === 'HIGH' ? 'var(--red)' : (z.riskLevel === 'MEDIUM' ? 'var(--amber)' : 'var(--green)');
+        let trendText = z.trend === 'INCREASING'
+          ? '<span style="color:var(--red);">↑ INCREASING</span>'
+          : (z.trend === 'DECREASING'
+            ? '<span style="color:var(--green);">↓ DECREASING</span>'
+            : '<span class="muted">→ STABLE</span>');
+        
+        html += `
+          <div class="crowd-card ${z.riskLevel === 'HIGH' ? 'high' : ''}">
+            <div class="crowd-c-top">
+              <span>${z.label}</span>
+              <span class="muted">FL ${z.floor}</span>
+            </div>
+            <div class="crowd-bar-bg">
+              <div class="crowd-bar-fill" style="width: ${Math.min(100, (z.density / 80) * 100)}%; background: ${barColor};"></div>
+            </div>
+            <div class="crowd-c-bot">
+              <span class="muted">${z.density} people</span>
+              ${trendText}
+              <span class="crowd-risk ${z.riskLevel.toLowerCase()}">${z.riskLevel}</span>
+            </div>
+            ${z.riskLevel === 'HIGH' && z.geminiSuggestion ? `<div class="crowd-suggestion">${z.geminiSuggestion}</div>` : ''}
+          </div>
+        `;
+      });
+      
+      if (grid) grid.innerHTML = html;
+
+      if (window.CrowdEngine) {
+         const warnings = window.CrowdEngine.getWarnings();
+         let addedNew = false;
+         warnings.forEach(w => {
+           if (!incidents.find(i => i.incidentId === w.warningId)) {
+             const newInc = {
+               incidentId: w.warningId, type: 'CROWD_SURGE', severity: w.severity, status: w.status,
+               location: w.location, locationDetail: null, floor: w.floor, silent: false,
+               description: w.description, device: 'SENSOR',
+               timestamp: w.timestamp, assignedResponder: null, events: [{ type: 'REPORTED', time: w.timestamp, actor: 'System' }], dispatch: {}
+             };
+             incidents.push(newInc);
+             addedNew = true;
+             
+             const toast = document.getElementById('crowd-toast');
+             toast.textContent = `⚠ Crowd Warning — ${w.label || w.location} — Monitor situation`;
+             toast.style.display = 'block';
+             setTimeout(() => { toast.style.display = 'none'; }, 4000);
+             playSound('MEDIUM');
+           }
+         });
+         if (addedNew) refreshUI();
+      }
+    }
+
+    function toggleCrowdPanel() {
+      document.getElementById('crowd-body').classList.toggle('show');
+    }
+
+    function simulateRandomSurge() {
+      if (!window.CrowdEngine) return;
+      const targets = ['LOBBY', 'RESTAURANT', 'BAR'];
+      const randomId = targets[Math.floor(Math.random() * targets.length)];
+      window.CrowdEngine.simulateSurge(randomId);
+    }
+
+    /* --- CORE LOGIC --- */
+    function setTab(t) { currentTab = t; refreshUI(); }
+    function selectIncident(id) { selIncId = id; ensureMap(); refreshUI(); }
+
+    function timeAgo(dateStr) {
+      const mins = Math.floor((new Date() - new Date(dateStr)) / 60000);
+      if (mins < 1) return 'Just now';
+      return mins > 59 ? Math.floor(mins / 60) + 'h ago' : mins + 'm ago';
+    }
+
+    function getActiveIncidents() { return incidents.filter(i => i.status !== 'RESOLVED' && i.status !== 'DISMISSED'); }
+    function getHistoryIncidents() { return incidents.filter(i => i.status === 'RESOLVED' || i.status === 'DISMISSED'); }
+
+    function refreshMasterStatus() {
+      const active = getActiveIncidents();
+      const pill = document.getElementById('master-status');
+      const snoozebtn = document.getElementById('snooze-btn');
+
+      let highest = 'NONE';
+      if (active.some(i => i.severity === 'HIGH')) highest = 'HIGH';
+      else if (active.some(i => i.severity === 'MEDIUM')) highest = 'MEDIUM';
+      else if (active.some(i => i.severity === 'LOW')) highest = 'LOW';
+
+      pill.className = 'status-pill condensed uppercase';
+      snoozebtn.style.display = 'none';
+
+      if (highest === 'HIGH') {
+        pill.classList.add('red');
+        pill.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 16h-2v-2h2v2zm0-4h-2v-5h2v5z"/></svg> CRITICAL — IMMEDIATE RESPONSE REQUIRED`;
+        if (Date.now() > snoozeUntil) snoozebtn.style.display = 'block';
+      } else if (highest === 'MEDIUM') {
+        pill.classList.add('amber');
+        pill.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm1 16h-2v-2h2v2zm0-4h-2v-5h2v5z"/></svg> ${active.length} ACTIVE INCIDENT(S) — HIGH ALERT`;
+      } else if (highest === 'LOW') {
+        pill.classList.add('amber');
+        pill.innerHTML = `ELEVATED ALERT`;
+      } else {
+        pill.classList.add('green');
+        pill.innerHTML = `<svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg> ALL CLEAR — SYSTEMS NORMAL`;
+        stopHighAlarm();
+      }
+    }
+
+    function refreshUI() {
+      const active = getActiveIncidents();
+      const history = getHistoryIncidents();
+
+      document.getElementById('count-active').textContent = active.length;
+      document.getElementById('count-history').textContent = history.length;
+
+      document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+      document.querySelector(`.tab:nth-child(${currentTab === 'ACTIVE' ? 1 : 2})`).classList.add('active');
+
+      const listEl = document.getElementById('inc-list');
+      listEl.innerHTML = '';
+
+      const toShow = currentTab === 'ACTIVE' ?
+        active.sort((a, b) => {
+          if (a.severity === 'HIGH' && b.severity !== 'HIGH') return -1;
+          if (b.severity === 'HIGH' && a.severity !== 'HIGH') return 1;
+          return new Date(b.timestamp) - new Date(a.timestamp);
+        }) :
+        history.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+      toShow.forEach(inc => {
+        const card = document.createElement('div');
+        card.className = `inc-card ${inc.incidentId === selIncId ? 'selected' : ''} ${currentTab === 'HISTORY' ? 'history-mode' : ''} ${inc.type === 'CROWD_SURGE' ? 'warning-mode' : ''}`;
+        card.onclick = () => selectIncident(inc.incidentId);
+
+        if (inc.type === 'CROWD_SURGE' && inc.status === 'WARNING' && currentTab === 'ACTIVE') {
+          card.innerHTML = `
+          <div class="inc-card-top">
+            <span class="bdg-sev medium">WARNING</span>
+            <span class="inc-type condensed uppercase">CROWD SURGE</span>
+            <span class="inc-time">${timeAgo(inc.timestamp)}</span>
+          </div>
+          <div class="inc-loc">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Floor ${inc.floor} &middot; ${inc.location}
+          </div>
+          <div class="action-btns" style="margin-top:12px;">
+            <button class="btn-amber condensed uppercase crowd-monitor-btn" data-id="${inc.incidentId}" style="padding:10px;font-size:14px;">Monitor</button>
+            <button class="btn-outline condensed uppercase crowd-dismiss-btn" data-id="${inc.incidentId}" style="padding:10px;font-size:14px;">Dismiss</button>
+          </div>
+          `;
+        } else {
+          card.innerHTML = `
+          <div class="inc-card-top">
+            <span class="bdg-sev ${inc.severity.toLowerCase()}">${inc.severity}</span>
+            <span class="inc-type condensed uppercase">${inc.type}</span>
+            <span class="inc-time">${timeAgo(inc.timestamp)}</span>
+          </div>
+          <div class="inc-loc">
+            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+            Floor ${inc.floor} &middot; ${inc.location} ${inc.locationDetail ? '&middot; ' + inc.locationDetail : ''}
+          </div>
+          <div class="inc-card-bot">
+            <span class="bdg-status uppercase ${inc.status.toLowerCase()}">${inc.status}</span>
+            <span class="inc-id">${inc.incidentId}</span>
+          </div>
+        `;
+        }
+        listEl.appendChild(card);
+      });
+      listEl.querySelectorAll('.crowd-monitor-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          changeStatus(btn.dataset.id, 'MONITORING');
+        });
+      });
+      listEl.querySelectorAll('.crowd-dismiss-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          changeStatus(btn.dataset.id, 'DISMISSED');
+        });
+      });
+
+      refreshMasterStatus();
+      renderDetailPanel();
+      renderMarkers();
+    }
+
+    function renderDetailPanel() {
+      const ph = document.getElementById('det-placeholder');
+      const det = document.getElementById('det-content');
+
+      const inc = incidents.find(i => i.incidentId === selIncId);
+      if (!inc) { ph.style.display = 'flex'; det.classList.remove('show'); return; }
+
+      ph.style.display = 'none'; det.classList.add('show');
+
+      // Header
+      document.getElementById('d-type').textContent = inc.type;
+      document.getElementById('d-badges').innerHTML = `
+        <span class="bdg-sev ${inc.severity.toLowerCase()}">${inc.severity}</span>
+        <span class="bdg-status ${inc.status.toLowerCase()}">${inc.status}</span>
+      `;
+      document.getElementById('d-id').textContent = 'ID: ' + inc.incidentId;
+      document.getElementById('d-time').textContent = new Date(inc.timestamp).toLocaleString('en-IN');
+
+      // Loc block
+      document.getElementById('d-floor').textContent = inc.floor;
+      document.getElementById('d-area').textContent = inc.location;
+      document.getElementById('d-room').textContent = inc.locationDetail || '—';
+      document.getElementById('d-device').textContent = inc.device;
+      document.getElementById('d-silent').textContent = inc.silent ? 'Yes' : 'No';
+      if (inc.silent) document.getElementById('d-silent').style.color = 'var(--amber)';
+      else document.getElementById('d-silent').style.color = '#fff';
+
+      // Desc
+      const dEl = document.getElementById('d-desc');
+      if (inc.description) { dEl.innerHTML = inc.description; dEl.style.fontStyle = 'normal'; dEl.style.color = '#e5e5e5'; }
+      else { dEl.innerHTML = 'No additional description provided'; dEl.style.fontStyle = 'italic'; dEl.style.color = 'var(--text-muted)'; }
+
+      // Timeline
+      let tlHtml = '';
+      if (inc.events) {
+        inc.events.forEach(e => {
+          tlHtml = `<div class="tl-item"><div class="tl-main">${e.type} by ${e.actor}</div><div class="tl-sub">${new Date(e.time).toLocaleString('en-IN')}</div>${e.note ? `<div class="tl-sub" style="color:#e5e5e5; font-style:italic">"${e.note}"</div>` : ''}</div>` + tlHtml;
+        });
+      }
+      document.getElementById('d-tl').innerHTML = tlHtml;
+
+      // Responder
+      const rActs = document.getElementById('d-resp-acts');
+      const aiRec = document.getElementById('d-ai-rec');
+      aiRec.style.display = 'none';
+
+      if (inc.assignedResponder) {
+        const r = inc.assignedResponder;
+        document.getElementById('d-resp-av').textContent = r.name.split(' ').map(n => n[0]).join('');
+        document.getElementById('d-resp-name').textContent = r.name;
+        document.getElementById('d-resp-role').textContent = r.role + (r.status ? ` • ${r.status}` : '');
+        document.getElementById('d-resp-av').style.background = 'var(--amber)';
+        document.getElementById('d-resp-av').style.color = '#000';
+        rActs.style.display = 'none';
+      } else {
+        document.getElementById('d-resp-av').textContent = '?';
+        document.getElementById('d-resp-name').textContent = 'Unassigned';
+        document.getElementById('d-resp-role').textContent = 'Pending';
+        document.getElementById('d-resp-av').style.background = 'var(--surface-2)';
+        document.getElementById('d-resp-av').style.color = 'var(--amber)';
+        rActs.style.display = inc.status === 'RESOLVED' ? 'none' : 'flex';
+      }
+
+      // Dispatch Panel
+      if (!inc.dispatch) inc.dispatch = {};
+      const dispHtml = [
+        { key: 'ambulance', name: 'Ambulance', num: '102', icon: '🚑' },
+        { key: 'police', name: 'Police', num: '100', icon: '🚓' },
+        { key: 'fireSafety', name: 'Fire Safety', num: '101', icon: '🚒' }
+      ].map(s => {
+        const state = inc.dispatch[s.key] || { notified: false };
+        const badge = state.notified ? `<span class="bdg-disp notified">Notified at ${new Date(state.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>` : `<span class="bdg-disp standby">Standby</span>`;
+        const btn = state.notified ? '' : `<button class="btn-outline" style="padding: 4px 10px; font-size: 12px;" onclick="notifyService('${inc.incidentId}', '${s.key}')">Notify</button>`;
+        return `
+          <div class="dispatch-row">
+            <div class="dispatch-info">
+              <div class="dispatch-icon">${s.icon}</div>
+              <div>
+                <div class="dispatch-name">${s.name}</div>
+                <div class="dispatch-num">${s.num}</div>
+              </div>
+            </div>
+            <div class="dispatch-actions">${badge}${btn}</div>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('d-dispatch-list').innerHTML = dispHtml;
+      document.getElementById('d-dispatch-reason').textContent = inc.dispatch.reason ? `AI Reasoning: ${inc.dispatch.reason}` : '';
+
+      // Actions
+      const acts = document.getElementById('d-actions');
+      if (inc.type === 'CROWD_SURGE' && inc.status === 'WARNING') {
+        acts.innerHTML = `
+          <button class="btn-amber condensed uppercase" style="flex:1;" onclick="changeStatus('${inc.incidentId}', 'MONITORING')">Monitor</button>
+          <button class="btn-outline condensed uppercase" style="flex:1;" onclick="changeStatus('${inc.incidentId}', 'DISMISSED')">Dismiss</button>
+        `;
+      } else if (inc.status === 'ACTIVE') {
+        acts.innerHTML = `<button class="btn-amber condensed uppercase" style="flex:1;" onclick="changeStatus('${inc.incidentId}', 'ACKNOWLEDGED')">Acknowledge Incident</button>`;
+      } else if (inc.status === 'ACKNOWLEDGED' || inc.status === 'MONITORING') {
+        acts.innerHTML = `<button class="btn-green condensed uppercase" style="flex:1;" onclick="changeStatus('${inc.incidentId}', 'RESOLVED')">Mark as Resolved</button>`;
+      } else {
+        acts.innerHTML = `<div class="muted condensed uppercase" style="font-size:16px; width:100%; text-align:center;"><svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24" style="vertical-align:text-bottom; margin-right:4px;"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg> Incident Closed</div>`;
+      }
+    }
+
+    function changeStatus(id, newStatus) {
+      if (newStatus === 'ACKNOWLEDGED') stopHighAlarm();
+      const inc = incidents.find(i => i.incidentId === id);
+      if (inc) {
+        inc.status = newStatus;
+        inc.events.push({ type: newStatus, time: new Date().toISOString(), actor: 'Command Centre' });
+      }
+      refreshUI();
+    }
+
+    function notifyService(incId, serviceKey) {
+      const inc = incidents.find(i => i.incidentId === incId);
+      if (inc) {
+        if (!inc.dispatch) inc.dispatch = {};
+        if (!inc.dispatch[serviceKey]) inc.dispatch[serviceKey] = { notified: false };
+        if (!inc.dispatch[serviceKey].notified) {
+          inc.dispatch[serviceKey] = { notified: true, time: new Date().toISOString() };
+          inc.events.push({ type: 'DISPATCH', time: new Date().toISOString(), actor: 'Command Centre', note: `Notified ${serviceKey}` });
+          refreshUI();
+        }
+      }
+    }
+
+    /* --- GEMINI AI LOGIC --- */
+    async function assignAI() {
+      const inc = incidents.find(i => i.incidentId === selIncId);
+      if (!inc) return;
+
+      const aiRec = document.getElementById('d-ai-rec');
+      aiRec.style.display = 'block';
+      aiRec.innerHTML = 'Analyzing emergency type...';
+
+      try {
+        const res = await fetch('/api/ai/assign', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ incident: inc })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Assignment failed');
+        const result = data.assignment;
+
+        aiRec.innerHTML = `<div><b>Recommended: ${result.name}</b></div><div style="margin-top:4px;color:rgba(255,255,255,0.7)">${result.reasoning}</div>
+          <div style="margin-top:8px;"><button class="btn-amber" style="padding:4px 10px; font-size:12px; background:#000; color:var(--amber);" onclick="applyAssignment('${inc.incidentId}', '${result.id}')">Confirm AI Assignment</button></div>`;
+      } catch (e) {
+        aiRec.innerHTML = 'AI Assignment failed. Please use Manual assignment.';
+        console.error(e);
+      }
+    }
+
+    function applyAssignment(incId, respId) {
+      const inc = incidents.find(i => i.incidentId === incId);
+      const resp = RESPONDERS.find(r => r.id === respId);
+      if (inc && resp) {
+        inc.assignedResponder = { ...resp, status: 'On Route' };
+        inc.events.push({ type: 'ASSIGNED', time: new Date().toISOString(), actor: 'AI System', note: `Assigned to ${resp.name}` });
+      }
+      // Close manual modal if open
+      document.getElementById('manual-modal').style.display = 'none';
+      refreshUI();
+    }
+
+    function openManualModal() {
+      if (!selIncId) return;
+      const modal = document.getElementById('manual-modal');
+      const grid = document.getElementById('manual-modal-grid');
+      const sub = document.getElementById('manual-modal-sub');
+      sub.textContent = `Assigning to incident ${selIncId}`;
+
+      // Find which responders are busy (assigned to an active incident)
+      const busyIds = new Set();
+      incidents.forEach(inc => {
+        if (inc.status === 'ACTIVE' && inc.assignedResponder) {
+          busyIds.add(inc.assignedResponder.id);
+        }
+      });
+
+      const ROLE_COLORS = {
+        'Security': '#ef4444',
+        'Medical': '#3b82f6',
+        'Fire Safety': '#f59e0b',
+        'General Staff': '#8b5cf6'
+      };
+
+      grid.innerHTML = RESPONDERS.map(r => {
+        const isBusy = busyIds.has(r.id);
+        const color = ROLE_COLORS[r.role] || '#64748b';
+        const initials = r.name.split(' ').map(n => n[0]).join('');
+        const skillBadges = r.skills.map(s => `<span class="skill-badge">${s}</span>`).join('');
+        const busyLabel = isBusy ? '<div class="resp-card-busy">● BUSY — Already assigned</div>' : '';
+
+        return `
+          <div class="resp-card ${isBusy ? 'busy' : ''}" ${isBusy ? '' : `onclick="applyAssignment('${selIncId}', '${r.id}')"`}>
+            <div class="resp-card-av" style="background:${color}22;color:${color};border:2px solid ${color}">${initials}</div>
+            <div class="resp-card-meta">
+              <div class="resp-card-name">${r.name}</div>
+              <div class="resp-card-role">${r.role}</div>
+              <div class="resp-card-skills">${skillBadges}</div>
+              ${busyLabel}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      modal.style.display = 'flex';
+    }
+
+    async function generateReport() {
+      const inc = incidents.find(i => i.incidentId === selIncId);
+      if (!inc) return;
+
+      const modal = document.getElementById('report-modal');
+      const printArea = document.getElementById('report-print-area');
+      modal.style.display = 'flex';
+      printArea.textContent = 'Generating report...';
+
+      try {
+        const res = await fetch('/api/ai/report', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ incident: inc })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'Report generation failed');
+        printArea.textContent = data.report;
+      } catch (e) {
+        printArea.textContent = 'Error generating report: ' + e.message;
+      }
+    }
+
+    function sendReportToResponder() {
+      if (DEMO_MODE) {
+        const toast = document.getElementById('toast-msg');
+        toast.textContent = "Report sent to Responder";
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 3000);
+      }
+    }
+
+    /* --- MAPS --- */
+    let map;
+    let markers = [];
+    let hotelPin = null;
+    const venueCoords = [22.7196, 75.8577];
+
+    // Fixed coordinate offsets per zone — stable across all refreshUI() calls
+    const ZONE_OFFSETS = {
+      LOBBY:      [ 0.00010,  0.00000],
+      RECEPTION:  [ 0.00010,  0.00005],
+      RESTAURANT: [ 0.00010,  0.00015],
+      BAR:        [ 0.00010, -0.00015],
+      POOL:       [-0.00010,  0.00015],
+      GYM:        [-0.00010,  0.00020],
+      CLUBHOUSE:  [-0.00010, -0.00015],
+      PARKING:    [-0.00020,  0.00000],
+      ELEVATOR:   [ 0.00000,  0.00000],
+      GARDEN:     [-0.00015,  0.00020],
+      CORRIDOR:   [ 0.00005, -0.00005],
+      ROOM:       [ 0.00005,  0.00010],
+      UNKNOWN:    [ 0.00000,  0.00005]
+    };
+
+    // Lazy init — only called the first time an incident is selected (panel visible)
+    function ensureMap() {
+      if (map) {
+        map.invalidateSize();
+        return;
+      }
+      map = L.map('gm-panel', { zoomControl: false, attributionControl: false }).setView(venueCoords, 18);
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        subdomains: 'abcd',
+        maxZoom: 20
+      }).addTo(map);
+
+      // Permanent amber hotel pin
+      const hotelHtml = `<div style="background:#f59e0b;width:22px;height:22px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 12px rgba(245,158,11,0.8);display:flex;align-items:center;justify-content:center;font-size:11px;">H</div>`;
+      const hotelIcon = L.divIcon({ html: hotelHtml, className: '', iconSize: [22, 22], iconAnchor: [11, 11] });
+      hotelPin = L.marker(venueCoords, { icon: hotelIcon })
+        .addTo(map)
+        .bindPopup('<b>Grand Meridian Hotel</b><br>Vijay Nagar, Indore', { className: 'map-popup' });
+
+      renderMarkers();
+    }
+
+    function renderMarkers() {
+      if (!map) return;
+      markers.forEach(m => map.removeLayer(m));
+      markers = [];
+
+      getActiveIncidents().forEach(inc => {
+        const offset = ZONE_OFFSETS[inc.location] || ZONE_OFFSETS.UNKNOWN;
+        const lat = venueCoords[0] + offset[0];
+        const lng = venueCoords[1] + offset[1];
+
+        const color = inc.severity === 'HIGH' ? '#dc2626' : (inc.severity === 'MEDIUM' ? '#f59e0b' : '#16a34a');
+        const markerHtml = `<div style="background-color:${color};width:16px;height:16px;border-radius:50%;border:2px solid white;box-shadow:0 0 10px rgba(0,0,0,0.5);"></div>`;
+        const icon = L.divIcon({ html: markerHtml, className: 'custom-marker', iconSize: [16, 16], iconAnchor: [8, 8] });
+
+        const popupHtml = `<b>${inc.type}</b><br>Floor ${inc.floor} · ${inc.location}${inc.locationDetail ? ' · ' + inc.locationDetail : ''}<br><span style="color:${color}">${inc.severity}</span>`;
+        const marker = L.marker([lat, lng], { icon })
+          .addTo(map)
+          .bindPopup(popupHtml, { className: 'map-popup' });
+        marker.on('click', () => { setTab('ACTIVE'); selectIncident(inc.incidentId); });
+        markers.push(marker);
+      });
+    }
+
+    window.onload = () => {
+      refreshUI();
+
+      if (window.CrowdEngine) {
+        window.CrowdEngine.start();
+        window.CrowdEngine.onUpdate(refreshCrowdPanel);
+      }
+
+      // Simulate new incident
+      setTimeout(() => {
+        const newInc = {
+          incidentId: 'CS-NEW999', type: 'ASSAULT', severity: 'HIGH', status: 'ACTIVE',
+          location: 'BAR', locationDetail: null, floor: '1', silent: true,
+          description: 'Altercation between two guests.', device: 'QR-SOS',
+          timestamp: new Date().toISOString(), assignedResponder: null,
+          events: [{ type: 'REPORTED', time: new Date().toISOString(), actor: 'Guest' }],
+          dispatch: { ambulance: { notified: false }, police: { notified: false }, fireSafety: { notified: false }, reason: '' }
+        };
+        incidents.push(newInc);
+        refreshUI();
+        playSound('HIGH');
+      }, 15000);
+    };
+
+  </script>
+  <script src="crowdEngine-browser.js"></script>
+</body>
+
+</html>

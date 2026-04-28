@@ -1,0 +1,1394 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>CrisisSync — Emergency SOS</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent
+    }
+
+    :root {
+      --red: #dc2626;
+      --red-dk: #991b1b;
+      --red-bg: rgba(220, 38, 38, .1);
+      --red-bd: rgba(220, 38, 38, .35);
+      --org: #ea580c;
+      --org-bg: rgba(234, 88, 12, .1);
+      --org-bd: rgba(234, 88, 12, .35);
+      --bg: #090909;
+      --s1: #131313;
+      --s2: #1b1b1b;
+      --s3: #222;
+      --b0: rgba(255, 255, 255, .06);
+      --b1: rgba(255, 255, 255, .12);
+      --b2: rgba(255, 255, 255, .2);
+      --tx: #f0f0f0;
+      --mu: rgba(240, 240, 240, .38);
+      --mu2: rgba(240, 240, 240, .6);
+      --gr: #16a34a;
+      --gr-bg: rgba(22, 163, 74, .1);
+      --rr: 12px;
+    }
+
+    body {
+      font-family: 'Barlow', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden
+    }
+
+    .stripe {
+      background: var(--red);
+      padding: 6px 16px;
+      text-align: center;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 3.5px;
+      color: rgba(255, 255, 255, .9);
+      animation: sb 2.5s ease-in-out infinite
+    }
+
+    @keyframes sb {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .65
+      }
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 13px 18px;
+      border-bottom: 1px solid var(--b0)
+    }
+
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: 4px;
+      color: var(--red)
+    }
+
+    .dots {
+      display: flex;
+      gap: 5px;
+      align-items: center
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--b1);
+      transition: all .3s
+    }
+
+    .dot.on {
+      width: 20px;
+      border-radius: 3px;
+      background: var(--red)
+    }
+
+    .dot.done {
+      background: var(--red-dk)
+    }
+
+    .scr {
+      flex: 1;
+      display: none;
+      flex-direction: column;
+      padding: 26px 18px 52px
+    }
+
+    .scr.go {
+      display: flex
+    }
+
+    #s1 {
+      align-items: center;
+      justify-content: center
+    }
+
+    /* SOS */
+    .sos-wrap {
+      position: relative;
+      width: 240px;
+      height: 240px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px
+    }
+
+    .sos-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg)
+    }
+
+    .rt {
+      fill: none;
+      stroke: rgba(220, 38, 38, .14);
+      stroke-width: 5
+    }
+
+    .rf {
+      fill: none;
+      stroke: var(--red);
+      stroke-width: 5;
+      stroke-linecap: round;
+      stroke-dasharray: 691;
+      stroke-dashoffset: 691;
+      transition: stroke-dashoffset .05s linear
+    }
+
+    .sos-btn {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: var(--red);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      z-index: 1;
+      animation: sp 2s ease-out infinite;
+      transition: transform .1s;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+    .sos-btn:active {
+      transform: scale(.94)
+    }
+
+    @keyframes sp {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, .5)
+      }
+
+      70% {
+        box-shadow: 0 0 0 30px rgba(220, 38, 38, 0)
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0)
+      }
+    }
+
+    .sl {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 54px;
+      font-weight: 800;
+      letter-spacing: 6px;
+      color: #fff;
+      line-height: 1
+    }
+
+    .ss {
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, .55)
+    }
+
+    .sh {
+      font-size: 13px;
+      color: var(--mu);
+      text-align: center;
+      line-height: 1.75
+    }
+
+    /* FORM */
+    #s2 {
+      gap: 0
+    }
+
+    .back {
+      background: none;
+      border: none;
+      color: var(--mu);
+      font-family: 'Barlow', sans-serif;
+      font-size: 13px;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-bottom: 20px
+    }
+
+    .back:hover {
+      color: var(--tx)
+    }
+
+    .back svg {
+      width: 16px;
+      height: 16px
+    }
+
+    .ftitle {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+      line-height: 1.1
+    }
+
+    .ftitle em {
+      color: var(--red);
+      font-style: normal
+    }
+
+    .fsec {
+      margin-bottom: 22px
+    }
+
+    .flbl {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 2.5px;
+      color: var(--mu);
+      text-transform: uppercase;
+      margin-bottom: 9px
+    }
+
+    .flbl small {
+      font-weight: 400;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 10px;
+      color: var(--mu)
+    }
+
+    /* TYPE GRID */
+    .tg {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px
+    }
+
+    .tb {
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 13px 11px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+      transition: border-color .15s, background .15s;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+    .tb:hover {
+      border-color: var(--b1)
+    }
+
+    .tb.on {
+      border-color: var(--red);
+      background: var(--red-bg)
+    }
+
+    .ti {
+      width: 34px;
+      height: 34px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.75;
+      filter: saturate(0.6) brightness(0.85);
+      transition: opacity .2s, filter .2s, transform .2s
+    }
+
+    .ti svg {
+      width: 28px;
+      height: 28px
+    }
+
+    .tb.on .ti {
+      opacity: 1;
+      filter: saturate(1) brightness(1);
+      transform: scale(1.1)
+    }
+
+    .tn {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--tx);
+      line-height: 1.3
+    }
+
+    /* LOC GRID */
+    .lg {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 7px
+    }
+
+    .lb {
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 11px 3px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: border-color .15s, background .15s;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+    .lb:hover {
+      border-color: var(--b1)
+    }
+
+    .lb.on {
+      border-color: var(--red);
+      background: var(--red-bg)
+    }
+
+    .li {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0.75;
+      filter: saturate(0.6) brightness(0.85);
+      transition: opacity .2s, filter .2s, transform .2s
+    }
+
+    .li svg {
+      width: 26px;
+      height: 26px
+    }
+
+    .lb.on .li {
+      opacity: 1;
+      filter: saturate(1) brightness(1);
+      transform: scale(1.1)
+    }
+
+    .ln {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--mu);
+      text-align: center;
+      line-height: 1.25
+    }
+
+    .lb.on .ln {
+      color: var(--mu2)
+    }
+
+    /* FLOOR */
+    .fr {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 7px
+    }
+
+    .fp {
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: 8px;
+      padding: 10px 4px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--mu);
+      cursor: pointer;
+      transition: all .15s;
+      -webkit-user-select: none;
+      user-select: none;
+      text-align: center;
+      width: 100%
+    }
+
+    .fp:hover {
+      border-color: var(--b1);
+      color: var(--tx)
+    }
+
+    .fp.on {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff
+    }
+
+    /* CUSTOM DROPDOWN */
+    .csd {
+      position: relative
+    }
+
+    .csd-t {
+      width: 100%;
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 13px 14px;
+      font-size: 14px;
+      font-family: 'Barlow', sans-serif;
+      color: var(--mu);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      transition: border-color .15s;
+      text-align: left
+    }
+
+    .csd-t:hover {
+      border-color: var(--b1)
+    }
+
+    .csd-t.open {
+      border-color: var(--red);
+      border-bottom-left-radius: 0;
+      border-bottom-right-radius: 0;
+      color: var(--tx)
+    }
+
+    .csd-t.val {
+      color: var(--tx)
+    }
+
+    .chev {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      transition: transform .2s
+    }
+
+    .csd-t.open .chev {
+      transform: rotate(180deg)
+    }
+
+    .csd-m {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: var(--s2);
+      border: 1.5px solid var(--red);
+      border-top: none;
+      border-bottom-left-radius: var(--rr);
+      border-bottom-right-radius: var(--rr);
+      z-index: 50;
+      overflow-y: auto;
+      max-height: 188px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--b1) transparent
+    }
+
+    .csd-m.open {
+      display: block
+    }
+
+    .csd-o {
+      padding: 11px 14px;
+      font-size: 14px;
+      color: var(--mu2);
+      cursor: pointer;
+      border-bottom: 1px solid var(--b0);
+      transition: background .12s, color .12s
+    }
+
+    .csd-o:last-child {
+      border-bottom: none
+    }
+
+    .csd-o:hover {
+      background: var(--red-bg);
+      color: var(--tx)
+    }
+
+    .csd-o.sel {
+      color: var(--red);
+      font-weight: 600
+    }
+
+    .csd-empty {
+      padding: 11px 14px;
+      font-size: 13px;
+      color: var(--mu);
+      font-style: italic
+    }
+
+    .csd-search {
+      padding: 8px;
+      border-bottom: 1px solid var(--b0);
+      position: sticky;
+      top: 0;
+      background: var(--s2);
+      z-index: 1
+    }
+
+    .csd-sinp {
+      width: 100%;
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: 8px;
+      padding: 9px 11px;
+      font-size: 13px;
+      font-family: 'Barlow', sans-serif;
+      color: var(--tx);
+      outline: none;
+      transition: border-color .15s
+    }
+
+    .csd-sinp::placeholder {
+      color: var(--mu)
+    }
+
+    .csd-sinp:focus {
+      border-color: var(--red)
+    }
+
+    /* PHOTO */
+    .ph-area {
+      display: flex;
+      flex-direction: column;
+      gap: 10px
+    }
+
+    .ph-btn {
+      background: var(--s1);
+      border: 1.5px dashed var(--b1);
+      border-radius: var(--rr);
+      padding: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--mu2);
+      transition: border-color .15s, background .15s;
+      font-family: 'Barlow', sans-serif
+    }
+
+    .ph-btn:hover {
+      border-color: var(--b2);
+      background: var(--s2);
+      color: var(--tx)
+    }
+
+    .ph-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0
+    }
+
+    #ph-inp {
+      display: none
+    }
+
+    .thumbs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .tw {
+      position: relative;
+      width: 64px;
+      height: 64px
+    }
+
+    .ti2 {
+      width: 64px;
+      height: 64px;
+      border-radius: 8px;
+      object-fit: cover;
+      border: 1px solid var(--b1)
+    }
+
+    .trm {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--red);
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0
+    }
+
+    .trm svg {
+      width: 10px;
+      height: 10px
+    }
+
+    /* SILENT */
+    .sil {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 13px 14px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+      -webkit-user-select: none;
+      user-select: none
+    }
+
+    .sil:hover {
+      border-color: var(--b1)
+    }
+
+    .sil.on {
+      border-color: var(--org-bd);
+      background: var(--org-bg)
+    }
+
+    .sil-l {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .sil-ic {
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      background: var(--s2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background .2s
+    }
+
+    .sil-ic svg {
+      width: 18px;
+      height: 18px
+    }
+
+    .sil.on .sil-ic {
+      background: var(--org-bg)
+    }
+
+    .sil-tt {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--tx)
+    }
+
+    .sil-sb {
+      font-size: 11px;
+      color: var(--mu);
+      margin-top: 1px
+    }
+
+    .tog {
+      width: 40px;
+      height: 22px;
+      border-radius: 11px;
+      background: var(--b1);
+      position: relative;
+      flex-shrink: 0;
+      transition: background .2s
+    }
+
+    .tog::after {
+      content: '';
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #fff;
+      transition: transform .2s
+    }
+
+    .sil.on .tog {
+      background: var(--org)
+    }
+
+    .sil.on .tog::after {
+      transform: translateX(18px)
+    }
+
+    /* TEXTAREA */
+    .desc {
+      width: 100%;
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 13px 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      font-family: 'Barlow', sans-serif;
+      color: var(--tx);
+      resize: none;
+      height: 76px;
+      outline: none;
+      transition: border-color .15s
+    }
+
+    .desc::placeholder {
+      color: var(--mu)
+    }
+
+    .desc:focus {
+      border-color: var(--red)
+    }
+
+    /* SEND */
+    .send {
+      width: 100%;
+      background: var(--red);
+      color: #fff;
+      border: none;
+      border-radius: var(--rr);
+      padding: 17px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      margin-top: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px
+    }
+
+    .send:active {
+      background: var(--red-dk);
+      transform: scale(.98)
+    }
+
+    .send.sil-mode {
+      background: var(--org)
+    }
+
+    .send.sil-mode:active {
+      background: #c2410c
+    }
+
+    .send svg {
+      width: 18px;
+      height: 18px
+    }
+
+    /* TOAST */
+    .toast {
+      background: rgba(220, 38, 38, .1);
+      border: 1px solid var(--red-bd);
+      border-radius: 9px;
+      padding: 10px 13px;
+      font-size: 13px;
+      color: #f87171;
+      display: none;
+      margin-bottom: 14px;
+      line-height: 1.5
+    }
+
+    .toast.show {
+      display: block
+    }
+
+    /* CONFIRM */
+    #s3 {
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 18px
+    }
+
+    .cc {
+      width: 90px;
+      height: 90px;
+      border-radius: 50%;
+      background: var(--gr-bg);
+      border: 2px solid var(--gr);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--gr)
+    }
+
+    .cc svg {
+      width: 44px;
+      height: 44px
+    }
+
+    .ct {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 38px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase
+    }
+
+    .clive {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--gr)
+    }
+
+    .ldot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--gr);
+      animation: ld 1.3s ease-in-out infinite
+    }
+
+    @keyframes ld {
+
+      0%,
+      100% {
+        opacity: 1
+      }
+
+      50% {
+        opacity: .15
+      }
+    }
+
+    .csub {
+      font-size: 14px;
+      color: var(--mu);
+      line-height: 1.8;
+      max-width: 280px
+    }
+
+    .cbdg {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      justify-content: center
+    }
+
+    .bdg {
+      background: var(--s2);
+      border: 1px solid var(--b1);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--mu2);
+      letter-spacing: .4px
+    }
+
+    .bdg.sil {
+      background: var(--org-bg);
+      border-color: var(--org-bd);
+      color: var(--org)
+    }
+
+    .cid {
+      font-family: monospace;
+      font-size: 12px;
+      color: var(--red);
+      background: var(--red-bg);
+      border: 1px solid var(--red-bd);
+      border-radius: 7px;
+      padding: 7px 16px
+    }
+
+    .ccard {
+      background: var(--s1);
+      border: 1px solid var(--b0);
+      border-radius: var(--rr);
+      padding: 17px 18px;
+      text-align: left;
+      width: 100%;
+      max-width: 340px;
+      font-size: 13px;
+      color: var(--mu);
+      line-height: 1.8
+    }
+
+    .ccard strong {
+      color: var(--tx);
+      font-weight: 600
+    }
+
+    /* SAFE NAVIGATION BUTTON */
+    @keyframes navGlow {
+      0%, 100% {
+        box-shadow: 0 0 8px rgba(22, 163, 74, .4), 0 0 24px rgba(22, 163, 74, .15)
+      }
+      50% {
+        box-shadow: 0 0 16px rgba(22, 163, 74, .7), 0 0 40px rgba(22, 163, 74, .3)
+      }
+    }
+
+    .nav-guide {
+      font-size: 12px;
+      color: rgba(240, 240, 240, .45);
+      letter-spacing: .3px;
+      margin-top: 6px
+    }
+
+    .nav-btn {
+      width: 100%;
+      max-width: 340px;
+      background: #16a34a;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      padding: 17px 24px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .15s, transform .1s;
+      animation: navGlow 2s ease-in-out infinite;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px
+    }
+
+    .nav-btn:active {
+      background: #15803d;
+      transform: scale(.97)
+    }
+
+    .nav-btn svg {
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="stripe">EMERGENCY RESPONSE SYSTEM &nbsp;·&nbsp; 24 / 7 ACTIVE</div>
+
+  <nav>
+    <div class="logo">CRISISYNC</div>
+    <div class="dots">
+      <div class="dot on" id="d1"></div>
+      <div class="dot" id="d2"></div>
+      <div class="dot" id="d3"></div>
+    </div>
+  </nav>
+
+  <!-- SCREEN 1 -->
+  <div class="scr go" id="s1">
+    <div class="sos-wrap">
+      <svg class="sos-svg" viewBox="0 0 240 240" aria-hidden="true">
+        <circle class="rt" cx="120" cy="120" r="110" />
+        <circle class="rf" cx="120" cy="120" r="110" id="ring" />
+      </svg>
+      <button class="sos-btn" id="sos-btn" onmousedown="hS(event)" onmouseup="hE()" onmouseleave="hE()"
+        ontouchstart="hS(event)" ontouchend="hE()" ontouchcancel="hE()">
+        <span class="sl">SOS</span>
+        <span class="ss">HOLD TO ACTIVATE</span>
+      </button>
+    </div>
+    <p class="sh">Hold the button for 2 seconds<br />to send an emergency alert</p>
+  </div>
+
+  <!-- SCREEN 2 -->
+  <div class="scr" id="s2">
+    <button class="back" onclick="goTo('s1',1)">
+      <svg viewBox="0 0 24 24">
+        <polyline points="16,19 10,13 16,7" fill="none" stroke="#991b1b" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <polyline points="15,18 9,12 15,6" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+      Back
+    </button>
+    <p class="ftitle">What's the<br /><em>Emergency?</em></p>
+    <div class="toast" id="toast"></div>
+
+    <div class="fsec">
+      <span class="flbl">Type of Emergency</span>
+      <div class="tg" id="tg"></div>
+    </div>
+
+    <div class="fsec">
+      <span class="flbl">Your Location</span>
+      <div class="lg" id="locg"></div>
+    </div>
+
+    <div class="fsec">
+      <span class="flbl">Floor</span>
+      <div class="fr" id="fr"></div>
+    </div>
+
+    <div class="fsec" id="room-sec" style="display:none">
+      <span class="flbl">Room Number</span>
+      <div class="csd">
+        <button class="csd-t" id="csd-t" onclick="toggleDrop()" type="button">
+          <span id="csd-lbl">Select your floor first</span>
+          <svg class="chev" viewBox="0 0 24 24">
+            <polyline points="7,10 13,16 19,10" fill="none" stroke="#991b1b" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+            <polyline points="6,9 12,15 18,9" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round"
+              stroke-linejoin="round" />
+          </svg>
+        </button>
+        <div class="csd-m" id="csd-m"></div>
+      </div>
+    </div>
+
+    <div class="fsec">
+      <span class="flbl">Attach Photo / Video <small>(optional)</small></span>
+      <div class="ph-area">
+        <input type="file" id="ph-inp" accept="image/*,video/*" multiple onchange="onPh(this)" />
+        <button class="ph-btn" type="button" onclick="document.getElementById('ph-inp').click()">
+          <svg viewBox="0 0 24 24">
+            <path d="M22.5 20.5a2 2 0 01-2 2H4.5a2 2 0 01-2-2V9.5a2 2 0 012-2h3.5l2-3h5l2 3h3.5a2 2 0 012 2z"
+              fill="#7f1d1d" />
+            <path d="M21 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" fill="#dc2626" />
+            <circle cx="12" cy="13" r="4" fill="#991b1b" />
+            <circle cx="11.5" cy="12.5" r="2.5" fill="#f87171" />
+          </svg>
+          Tap to capture or upload evidence
+        </button>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+
+    <div class="fsec">
+      <span class="flbl">Alert Mode</span>
+      <div class="sil" id="sil" onclick="togSil()" role="switch" aria-checked="false">
+        <div class="sil-l">
+          <div class="sil-ic" id="sil-ic">
+            <svg viewBox="0 0 24 24">
+              <path d="M17.5 9.5a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#7f1d1d" />
+              <path d="M16 8a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#dc2626" />
+              <path d="M12.7 19a2 2 0 01-3.4 0" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"
+                fill="none" />
+            </svg>
+          </div>
+          <div>
+            <div class="sil-tt" id="sil-tt">Standard Alert</div>
+            <div class="sil-sb" id="sil-sb">Audible alarm triggered on-site</div>
+          </div>
+        </div>
+        <div class="tog"></div>
+      </div>
+    </div>
+
+    <div class="fsec">
+      <span class="flbl">Additional Details <small>(optional)</small></span>
+      <textarea class="desc" id="desc"
+        placeholder="e.g. Smoke from bathroom, person collapsed near the entrance…"></textarea>
+    </div>
+
+    <button class="send" id="send-btn" onclick="doSubmit()" type="button">
+      <svg viewBox="0 0 24 24">
+        <polygon points="23,3 16,23 12,14 3,10" fill="rgba(255,255,255,0.25)" />
+        <polygon points="22,2 15,22 11,13 2,9" fill="#fff" />
+        <path d="M22 2L11 13" stroke="rgba(0,0,0,0.1)" stroke-width="1.5" />
+      </svg>
+      Send Emergency Alert
+    </button>
+  </div>
+
+  <!-- SCREEN 3 -->
+  <div class="scr" id="s3">
+    <div class="cc">
+      <svg viewBox="0 0 24 24">
+        <polyline points="21,7 10,18 5,13" fill="none" stroke="#065f46" stroke-width="3" stroke-linecap="round"
+          stroke-linejoin="round" />
+        <polyline points="20,6 9,17 4,12" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round"
+          stroke-linejoin="round" />
+      </svg>
+    </div>
+    <p class="ct" id="ct">Alert Sent</p>
+    <div class="clive">
+      <div class="ldot"></div><span id="clv">Security team notified</span>
+    </div>
+    <p class="csub">Emergency services and hotel security have been alerted. Help is on the way to your location.</p>
+    <div class="cbdg" id="cbdg"></div>
+    <div class="cid" id="cid">Connecting…</div>
+    <p class="nav-guide">AI will guide you to the nearest safe exit</p>
+    <button class="nav-btn" id="nav-btn" onclick="openNavMode()" type="button">
+      <svg viewBox="0 0 24 24"><path d="M9 3L5 6.5v5c0 4 2 7.5 5 9 3-1.5 5-5 5-9V6.5z" fill="#065f46" transform="translate(1.5,1)"/><path d="M9 3L5 6.5v5c0 4 2 7.5 5 9 3-1.5 5-5 5-9V6.5z" fill="#16a34a"/><path d="M9 8v4m0 0l2-2m-2 2l-2-2" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+      Enter Safe Navigation Mode
+    </button>
+    <div class="ccard">
+      <strong>Stay calm.</strong> If it is safe, remain where you are.<br /><br />
+      A staff member will reach you shortly.<br /><br />
+      <strong>If in immediate danger</strong> — follow the instructions to the nearest emergency exit.
+    </div>
+  </div>
+
+  <script>
+    /* ── ICONS ── */
+    const IC = {
+      fire: `<svg viewBox="0 0 24 24"><path d="M11 3C8 7 6 10 6 13.5c0 2.5 2.2 4.5 5 4.5s5-2 5-4.5C16 10 14 7 11 3z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M11 3C8 7 6 10 6 13.5c0 2.5 2.2 4.5 5 4.5s5-2 5-4.5C16 10 14 7 11 3z" fill="#dc2626"/><path d="M11 8c-1 2-2 3.5-2 5c0 1.1.9 2 2 2s2-.9 2-2c0-1.5-1-3-2-5z" fill="#f87171"/></svg>`,
+      medical: `<svg viewBox="0 0 24 24"><path d="M8.5 3h5v5h5v5h-5v5h-5v-5h-5v-5h5z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M8.5 3h5v5h5v5h-5v5h-5v-5h-5v-5h5z" fill="#dc2626"/><path d="M9.5 4h3v5h5v3h-8z" fill="#f87171"/></svg>`,
+      security: `<svg viewBox="0 0 24 24"><path d="M11 2L5 5v5.5c0 4.5 2.5 8.5 6 10 3.5-1.5 6-5.5 6-10V5z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M11 2L5 5v5.5c0 4.5 2.5 8.5 6 10 3.5-1.5 6-5.5 6-10V5z" fill="#dc2626"/><polyline points="8.5,10.5 10,12 13.5,8.5" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      assault: `<svg viewBox="0 0 24 24"><path d="M11 3L3 18h16z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M11 3L3 18h16z" fill="#dc2626"/><line x1="11" y1="9" x2="11" y2="13" stroke="#f87171" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="15.5" r=".8" fill="#f87171"/></svg>`,
+      evacuation: `<svg viewBox="0 0 24 24"><g fill="#7f1d1d" transform="translate(1.5,1.5)"><circle cx="9" cy="3.5" r="2"/><path d="M7 8l-1.5 4 2.5.5-1.5 6.5h2l1.5-5 2 1.5V20h2v-6l-2.5-2.5 1-3c.8.5 2 1 3 1V8c-1.5 0-2.5-.5-3.2-1.5H9z"/></g><circle cx="9" cy="3.5" r="2" fill="#dc2626"/><path d="M7 8l-1.5 4 2.5.5-1.5 6.5h2l1.5-5 2 1.5V20h2v-6l-2.5-2.5 1-3c.8.5 2 1 3 1V8c-1.5 0-2.5-.5-3.2-1.5H9z" fill="#dc2626"/><path d="M17 10h3m-1.5-1.5L20 10l-1.5 1.5" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+      other_t: `<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8.5" fill="#7f1d1d" transform="translate(1.5,1.5)"/><circle cx="11" cy="11" r="8.5" fill="#dc2626"/><path d="M8.5 8.5a3 3 0 015 1c0 1.5-2 2.5-2 3.5" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" fill="none"/><circle cx="11.5" cy="15.5" r=".8" fill="#f87171"/></svg>`,
+      room: `<svg viewBox="0 0 24 24"><rect x="2" y="8" width="18" height="10" rx="1.5" fill="#7f1d1d" transform="translate(1.5,1.5)"/><rect x="2" y="8" width="18" height="10" rx="1.5" fill="#dc2626"/><path d="M7 8V6.5C7 5.1 8.1 4 9.5 4h3c1.4 0 2.5 1.1 2.5 2.5V8" fill="#991b1b"/><line x1="2" y1="13" x2="20" y2="13" stroke="#f87171" stroke-width="1"/><rect x="3.5" y="5.5" width="4.5" height="2.5" rx="1" fill="#f87171"/></svg>`,
+      restaurant: `<svg viewBox="0 0 24 24"><ellipse cx="11" cy="12" rx="8" ry="6" fill="#7f1d1d" transform="translate(1.5,1.5)"/><ellipse cx="11" cy="12" rx="8" ry="6" fill="#dc2626"/><ellipse cx="10.5" cy="11.5" rx="5" ry="3.5" fill="#f87171"/><ellipse cx="10" cy="11" rx="3" ry="2" fill="#fca5a5"/></svg>`,
+      bar: `<svg viewBox="0 0 24 24"><g transform="translate(1.5,1.5)"><path d="M6 3h10l-3.5 7h-3z" fill="#7f1d1d"/><rect x="10" y="10" width="2" height="7" fill="#7f1d1d"/><rect x="7" y="17" width="8" height="2" rx="1" fill="#7f1d1d"/></g><path d="M6 3h10l-3.5 7h-3z" fill="#dc2626"/><path d="M6 3h5L9.5 10h-3z" fill="#f87171"/><rect x="10" y="10" width="2" height="7" fill="#991b1b"/><rect x="7" y="17" width="8" height="2" rx="1" fill="#991b1b"/></svg>`,
+      pool: `<svg viewBox="0 0 24 24"><path d="M3.5 12.5c1.5 0 3-1.5 4.5-1.5s3 1.5 4.5 1.5 3-1.5 4.5-1.5 3 1.5 4.5 1.5v4c-1.5 0-3-1.5-4.5-1.5s-3 1.5-4.5 1.5-3-1.5-4.5-1.5-3 1.5-4.5 1.5z" fill="#7f1d1d"/><path d="M2 11c1.5 0 3-1.5 4.5-1.5S9.5 11 11 11s3-1.5 4.5-1.5S18.5 11 20 11v4c-1.5 0-3-1.5-4.5-1.5S12.5 15 11 15s-3-1.5-4.5-1.5S3.5 15 2 15z" fill="#dc2626"/><path d="M2 15c1.5 0 3-1 4.5-1s3 1 4.5 1 3-1 4.5-1 3 1 4.5 1v3c-1.5 0-3-1-4.5-1s-3 1-4.5 1-3-1-4.5-1-3 1-4.5 1z" fill="#991b1b"/><circle cx="17" cy="6" r="1.5" fill="#f87171"/></svg>`,
+      lobby: `<svg viewBox="0 0 24 24"><path d="M3 10l8-7 8 7v10H3z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M3 10l8-7 8 7v10H3z" fill="#dc2626"/><path d="M11 10l8-7v7z" fill="#991b1b"/><rect x="8" y="14" width="5" height="6" fill="#f87171"/></svg>`,
+      gym: `<svg viewBox="0 0 24 24"><g transform="translate(1.5,1.5)"><rect x="1" y="9" width="4" height="5" rx="1" fill="#7f1d1d"/><rect x="17" y="9" width="4" height="5" rx="1" fill="#7f1d1d"/><rect x="5" y="7" width="2" height="9" fill="#7f1d1d"/><rect x="15" y="7" width="2" height="9" fill="#7f1d1d"/><rect x="7" y="10.5" width="8" height="2" fill="#7f1d1d"/></g><rect x="1" y="9" width="4" height="5" rx="1" fill="#dc2626"/><rect x="17" y="9" width="4" height="5" rx="1" fill="#dc2626"/><rect x="5" y="7" width="2" height="9" fill="#991b1b"/><rect x="15" y="7" width="2" height="9" fill="#991b1b"/><rect x="7" y="10.5" width="8" height="2" fill="#f87171"/></svg>`,
+      clubhouse: `<svg viewBox="0 0 24 24"><path d="M3 10.5l8-7 8 7V20H3z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M3 10.5l8-7 8 7V20H3z" fill="#dc2626"/><path d="M11 10.5l8-7v7z" fill="#991b1b"/><polygon points="11,8 12,10.5 14.5,10.5 12.5,12 13.2,14.5 11,13 8.8,14.5 9.5,12 7.5,10.5 10,10.5" fill="#f87171"/></svg>`,
+      parking: `<svg viewBox="0 0 24 24"><rect x="3" y="3" width="16" height="16" rx="2" fill="#7f1d1d" transform="translate(1.5,1.5)"/><rect x="3" y="3" width="16" height="16" rx="2" fill="#dc2626"/><path d="M8 16V6h4.5a3 3 0 010 6H8" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      elevator: `<svg viewBox="0 0 24 24"><rect x="5" y="2" width="12" height="18" rx="1.5" fill="#7f1d1d" transform="translate(1.5,1.5)"/><rect x="5" y="2" width="12" height="18" rx="1.5" fill="#dc2626"/><line x1="11" y1="2" x2="11" y2="20" stroke="#991b1b" stroke-width="1"/><polyline points="8,7 11,3.5 14,7" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="8,15 11,18.5 14,15" fill="none" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+      garden: `<svg viewBox="0 0 24 24"><g transform="translate(1.5,1.5)"><rect x="10" y="12" width="2" height="8" fill="#7f1d1d"/><path d="M11 12C9 9 5 6 3 8c2 3.5 6 4 8 4z" fill="#7f1d1d"/><path d="M11 12c2-3 6-6 8-4-2 3.5-6 4-8 4z" fill="#7f1d1d"/></g><rect x="10" y="12" width="2" height="8" fill="#991b1b"/><path d="M11 12C9 9 5 6 3 8c2 3.5 6 4 8 4z" fill="#dc2626"/><path d="M11 12c2-3 6-6 8-4-2 3.5-6 4-8 4z" fill="#f87171"/><line x1="5" y1="21" x2="17" y2="21" stroke="#991b1b" stroke-width="1.5"/></svg>`,
+      corridor: `<svg viewBox="0 0 24 24"><g transform="translate(1.5,1.5)"><rect x="2" y="3" width="5" height="16" rx="1" fill="#7f1d1d"/><rect x="15" y="3" width="5" height="16" rx="1" fill="#7f1d1d"/></g><rect x="2" y="3" width="5" height="16" rx="1" fill="#dc2626"/><rect x="15" y="3" width="5" height="16" rx="1" fill="#991b1b"/><path d="M9 11h4m-1.5-2L13 11l-1.5 2" stroke="#f87171" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`,
+      pin: `<svg viewBox="0 0 24 24"><path d="M11 2C7.7 2 5 4.7 5 8c0 5 6 12 6 12s6-7 6-12c0-3.3-2.7-6-6-6z" fill="#7f1d1d" transform="translate(1.5,1.5)"/><path d="M11 2C7.7 2 5 4.7 5 8c0 5 6 12 6 12s6-7 6-12c0-3.3-2.7-6-6-6z" fill="#dc2626"/><circle cx="11" cy="8" r="2.5" fill="#f87171"/></svg>`,
+      bell_off: `<svg viewBox="0 0 24 24"><path d="M17.5 9.5a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#7f1d1d"/><path d="M16 8a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#ea580c"/><path d="M12.5 19a2 2 0 01-3 0" stroke="#fb923c" stroke-width="1.5" stroke-linecap="round" fill="none"/><line x1="3" y1="3" x2="19" y2="19" stroke="#fb923c" stroke-width="2" stroke-linecap="round"/></svg>`,
+      x: `<svg viewBox="0 0 24 24"><g transform="translate(1,1)"><line x1="17" y1="7" x2="7" y2="17" stroke="#991b1b" stroke-width="3" stroke-linecap="round"/><line x1="7" y1="7" x2="17" y2="17" stroke="#991b1b" stroke-width="3" stroke-linecap="round"/></g><line x1="17" y1="7" x2="7" y2="17" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/><line x1="7" y1="7" x2="17" y2="17" stroke="#dc2626" stroke-width="3" stroke-linecap="round"/></svg>`,
+    };
+
+    /* ── DATA ── */
+    const TYPES = [
+      { v: 'FIRE', label: 'Fire / Smoke', ic: 'fire' },
+      { v: 'MEDICAL', label: 'Medical Emergency', ic: 'medical' },
+      { v: 'SECURITY', label: 'Security / Intruder', ic: 'security' },
+      { v: 'ASSAULT', label: 'Assault / Harassment', ic: 'assault' },
+      { v: 'EVACUATION', label: 'Evacuation Needed', ic: 'evacuation' },
+      { v: 'OTHER', label: 'Other', ic: 'other_t' },
+    ];
+    const LOCS = [
+      { v: 'ROOM', label: 'Room', ic: 'room', det: true },
+      { v: 'RESTAURANT', label: 'Restaurant', ic: 'restaurant' },
+      { v: 'BAR', label: 'Bar/Lounge', ic: 'bar' },
+      { v: 'POOL', label: 'Pool/Spa', ic: 'pool' },
+      { v: 'LOBBY', label: 'Lobby', ic: 'lobby' },
+      { v: 'GYM', label: 'Gym', ic: 'gym' },
+      { v: 'CLUBHOUSE', label: 'Clubhouse', ic: 'clubhouse' },
+      { v: 'PARKING', label: 'Parking', ic: 'parking' },
+      { v: 'ELEVATOR', label: 'Elevator', ic: 'elevator' },
+      { v: 'GARDEN', label: 'Garden', ic: 'garden' },
+      { v: 'CORRIDOR', label: 'Corridor', ic: 'corridor' },
+      { v: 'OTHER_LOC', label: 'Other Area', ic: 'pin' },
+    ];
+    const FLOORS = ['B2', 'B1', 'G', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+    const mk = (f, a, b, p = 2) => Array.from({ length: b - a + 1 }, (_, i) => f + String(a + i).padStart(p, '0'));
+    const ROOMS = {
+      'B2': mk('B2-', 1, 8), 'B1': mk('B1-', 1, 12),
+      'G': ['G-01', 'G-02', 'G-03', 'G-04', 'G-05', 'G-06', 'Ballroom A', 'Ballroom B', 'Conference A', 'Conference B'],
+      '1': mk('1', 1, 24), '2': mk('2', 1, 24), '3': mk('3', 1, 22),
+      '4': mk('4', 1, 22), '5': mk('5', 1, 20), '6': mk('6', 1, 20),
+      '7': mk('7', 1, 18), '8': mk('8', 1, 14), '9': mk('9', 1, 12),
+    };
+
+    /* ── RENDER ── */
+    const tg = document.getElementById('tg');
+    TYPES.forEach(t => {
+      const b = document.createElement('button'); b.className = 'tb'; b.dataset.v = t.v;
+      b.innerHTML = `<div class="ti">${IC[t.ic]}</div><span class="tn">${t.label}</span>`;
+      b.onclick = () => { pick('tb', b); selType = t.v; hT(); };
+      tg.appendChild(b);
+    });
+    const lg = document.getElementById('locg');
+    LOCS.forEach(l => {
+      const b = document.createElement('button'); b.className = 'lb'; b.dataset.v = l.v;
+      b.innerHTML = `<div class="li">${IC[l.ic]}</div><span class="ln">${l.label}</span>`;
+      b.onclick = () => { pick('lb', b); selLoc = l.v; selRoom = null; showRoomSec(l.det); hT(); };
+      lg.appendChild(b);
+    });
+    const fr = document.getElementById('fr');
+    FLOORS.forEach(f => {
+      const b = document.createElement('button'); b.className = 'fp'; b.dataset.v = f;
+      b.textContent = f;
+      b.onclick = () => { pick('fp', b); selFloor = f; selRoom = null; updDrop(); hT(); };
+      fr.appendChild(b);
+    });
+
+    /* ── STATE ── */
+    let selType = null, selLoc = null, selFloor = null, selRoom = null, isSilent = false, dropOpen = false;
+    const UP = new URLSearchParams(location.search);
+    const uF = UP.get('floor'), uR = UP.get('room');
+    if (uF) { const fp = document.querySelector(`.fp[data-v="${uF}"]`); if (fp) fp.click(); }
+
+    /* ── HOLD ── */
+    const HOLD = 2000, ring = document.getElementById('ring'), C = 2 * Math.PI * 110;
+    ring.style.strokeDasharray = C; ring.style.strokeDashoffset = C;
+    let _t = null, _r = null, _t0 = null;
+    function hS(e) {
+      if (e) e.preventDefault(); _t0 = Date.now(); _r = requestAnimationFrame(tk);
+      _t = setTimeout(() => { cancelAnimationFrame(_r); ring.style.strokeDashoffset = 0; setTimeout(() => goTo('s2', 2), 180); }, HOLD);
+    }
+    function hE() {
+      clearTimeout(_t); cancelAnimationFrame(_r); _t0 = null;
+      ring.style.transition = 'stroke-dashoffset .35s ease'; ring.style.strokeDashoffset = C; setTimeout(() => ring.style.transition = '', 380);
+    }
+    function tk() { if (!_t0) return; ring.style.strokeDashoffset = C * (1 - Math.min((Date.now() - _t0) / HOLD, 1)); _r = requestAnimationFrame(tk); }
+
+    /* ── NAV ── */
+    function goTo(id, step) {
+      document.querySelectorAll('.scr').forEach(s => s.classList.remove('go'));
+      document.getElementById(id).classList.add('go');
+      document.querySelectorAll('.dot').forEach((d, i) => { d.className = 'dot'; if (i + 1 < step) d.classList.add('done'); else if (i + 1 === step) d.classList.add('on'); });
+    }
+    function pick(cls, btn) { document.querySelectorAll('.' + cls).forEach(b => b.classList.remove('on')); btn.classList.add('on'); }
+
+    /* ── ROOM DROPDOWN ── */
+    function showRoomSec(yes) {
+      const sec = document.getElementById('room-sec');
+      sec.style.display = yes ? 'block' : 'none';
+      if (yes) updDrop(); else closeDrop();
+    }
+    function updDrop() {
+      const trig = document.getElementById('csd-t'), menu = document.getElementById('csd-m'), lbl = document.getElementById('csd-lbl');
+      if (!selFloor) { lbl.textContent = 'Select your floor first'; trig.classList.remove('val'); menu.innerHTML = ''; return; }
+      const rooms = ROOMS[selFloor] || [];
+      lbl.textContent = selRoom || 'Select room number';
+      trig.classList.toggle('val', !!selRoom);
+      menu.innerHTML = rooms.length
+        ? '<div class="csd-search"><input type="text" class="csd-sinp" id="csd-sinp" placeholder="Search room number…" oninput="filterRooms(this.value)" onclick="event.stopPropagation()"/></div>' + rooms.map(r => `<div class="csd-o${r === selRoom ? ' sel' : ''}" onclick="pickRoom('${r}')">${r}</div>`).join('')
+        : '<div class="csd-empty">No rooms listed for this floor</div>';
+    }
+    function filterRooms(q) {
+      const items = document.querySelectorAll('.csd-o');
+      const query = q.toLowerCase();
+      items.forEach(item => { item.style.display = item.textContent.toLowerCase().includes(query) ? '' : 'none'; });
+    }
+    function pickRoom(r) {
+      selRoom = r; document.getElementById('csd-lbl').textContent = r;
+      document.getElementById('csd-t').classList.add('val');
+      document.querySelectorAll('.csd-o').forEach(o => o.classList.toggle('sel', o.textContent === r));
+      closeDrop();
+    }
+    function toggleDrop() {
+      if (!selFloor) { showT('Please select a floor to see room options.'); return; }
+      dropOpen = !dropOpen;
+      document.getElementById('csd-t').classList.toggle('open', dropOpen);
+      document.getElementById('csd-m').classList.toggle('open', dropOpen);
+      if (dropOpen) { const sinp = document.getElementById('csd-sinp'); if (sinp) { sinp.value = ''; filterRooms(''); setTimeout(() => sinp.focus(), 50); } }
+    }
+    function closeDrop() { dropOpen = false; document.getElementById('csd-t').classList.remove('open'); document.getElementById('csd-m').classList.remove('open'); }
+    document.addEventListener('click', e => { if (dropOpen && !e.target.closest('.csd')) closeDrop(); });
+
+    /* ── PHOTO ── */
+    function onPh(inp) {
+      const th = document.getElementById('thumbs');
+      Array.from(inp.files).forEach(f => {
+        if (!f.type.startsWith('image/') && !f.type.startsWith('video/')) return;
+        const w = document.createElement('div'); w.className = 'tw';
+        const img = document.createElement('img'); img.className = 'ti2'; img.src = URL.createObjectURL(f);
+        const rm = document.createElement('button'); rm.className = 'trm'; rm.type = 'button';
+        rm.innerHTML = IC.x; rm.onclick = () => w.remove();
+        w.appendChild(img); w.appendChild(rm); th.appendChild(w);
+      });
+      inp.value = '';
+    }
+
+    /* ── SILENT ── */
+    function togSil() {
+      isSilent = !isSilent;
+      const row = document.getElementById('sil'), ic = document.getElementById('sil-ic'),
+        tt = document.getElementById('sil-tt'), sb = document.getElementById('sil-sb'),
+        btn = document.getElementById('send-btn');
+      row.classList.toggle('on', isSilent);
+      row.setAttribute('aria-checked', isSilent);
+      if (isSilent) {
+        tt.textContent = 'Silent Alert'; sb.textContent = 'No audible alarm — discreet notification only';
+        ic.innerHTML = IC.bell_off; btn.className = 'send sil-mode';
+        btn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="23,3 16,23 12,14 3,10" fill="rgba(255,255,255,0.25)"/><polygon points="22,2 15,22 11,13 2,9" fill="#fff"/><path d="M22 2L11 13" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/></svg> Send Silent Alert`;
+      } else {
+        tt.textContent = 'Standard Alert'; sb.textContent = 'Audible alarm triggered on-site';
+        ic.innerHTML = `<svg viewBox="0 0 24 24"><path d="M17.5 9.5a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#7f1d1d"/><path d="M16 8a5 5 0 00-10 0c0 6-2.5 8-2.5 8h15s-2.5-2-2.5-8z" fill="#dc2626"/><path d="M12.7 19a2 2 0 01-3.4 0" stroke="#f87171" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg>`;
+        btn.className = 'send';
+        btn.innerHTML = `<svg viewBox="0 0 24 24"><polygon points="23,3 16,23 12,14 3,10" fill="rgba(255,255,255,0.25)"/><polygon points="22,2 15,22 11,13 2,9" fill="#fff"/><path d="M22 2L11 13" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/></svg> Send Emergency Alert`;
+      }
+    }
+
+    /* ── TOAST ── */
+    function showT(m) { const t = document.getElementById('toast'); t.textContent = m; t.classList.add('show'); t.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    function hT() { document.getElementById('toast').classList.remove('show'); }
+
+    /* ── SUBMIT ── */
+    async function doSubmit() {
+      if (!selType) { showT('Please select the type of emergency.'); return; }
+      if (!selLoc) { showT('Please select your location.'); return; }
+      if (!selFloor) { showT('Please select your floor.'); return; }
+      const needsRoom = LOCS.find(l => l.v === selLoc)?.det;
+      if (needsRoom && !selRoom) { showT('Please select your room or area number.'); return; }
+
+      const id = 'CS-' + Date.now().toString(36).toUpperCase();
+      const locLabel = LOCS.find(l => l.v === selLoc)?.label || selLoc;
+      const typeLabel = TYPES.find(t => t.v === selType)?.label || selType;
+
+      const bdg = document.getElementById('cbdg');
+      bdg.innerHTML = [typeLabel, (selRoom ? selRoom + ' · ' : '') + locLabel, 'Floor ' + selFloor]
+        .map(t => `<span class="bdg">${t}</span>`).join('');
+      if (isSilent) bdg.innerHTML += `<span class="bdg sil">Silent Alert</span>`;
+
+      document.getElementById('ct').textContent = isSilent ? 'Silent Alert Sent' : 'Alert Sent';
+      document.getElementById('clv').textContent = isSilent ? 'Discreet security notification sent' : 'Security team notified';
+      document.getElementById('cid').textContent = 'Incident ID: ' + id;
+      goTo('s3', 3);
+
+      const photos = [...document.querySelectorAll('.ti2')].map(i => i.src);
+      const payload = { incidentId: id, type: selType, location: selLoc, locationDetail: selRoom || uR || null, floor: selFloor, silent: isSilent, photoCount: photos.length, description: document.getElementById('desc').value.trim() || selType, device: 'QR-SOS', timestamp: new Date().toISOString() };
+      try { await fetch('/api/alert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); } catch (_) { }
+    }
+
+    /* ── SAFE NAVIGATION ── */
+    function openNavMode() {
+      const params = new URLSearchParams();
+      if (selFloor) params.set('floor', selFloor);
+      if (selRoom) params.set('room', selRoom);
+      if (selType) params.set('type', selType);
+      params.set('mode', 'evacuate');
+      window.open('floorplan.html?' + params.toString(), '_blank');
+    }
+  </script>
+</body>
+
+</html>

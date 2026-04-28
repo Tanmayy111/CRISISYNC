@@ -1,0 +1,141 @@
+{
+  "crisisync": {
+
+    "incidents": {
+      "INC-001": {
+        "id": "INC-001",
+        "type": "FIRE",
+        "severity": "HIGH",
+        "status": "ACTIVE",
+        "silent": false,
+        "photoCount": 0,
+        "location": {
+          "floor": 3,
+          "room": "302",
+          "zone": "East Wing"
+        },
+        "reportedBy": {
+          "role": "GUEST",
+          "name": "Anonymous",
+          "device": "QR-SOS"
+        },
+        "timestamps": {
+          "reported": "2024-01-15T14:32:07Z",
+          "acknowledged": "2024-01-15T14:32:12Z",
+          "resolved": null
+        },
+        "description": "Smoke detected near room 302",
+        "assignedRoles": ["SECURITY", "MANAGER", "MEDICAL"],
+        "auditLog": {
+          "log_001": {
+            "timestamp": "2024-01-15T14:32:07Z",
+            "actor": "SYSTEM",
+            "action": "INCIDENT_CREATED",
+            "detail": "Alert received via Guest SOS"
+          },
+          "log_002": {
+            "timestamp": "2024-01-15T14:32:12Z",
+            "actor": "PUBSUB",
+            "action": "ROLES_DISPATCHED",
+            "detail": "Security, Manager, Medical notified"
+          }
+        }
+      },
+      "CS-1ABC2D": {
+        "id": "CS-1ABC2D",
+        "type": "SECURITY",
+        "severity": "MEDIUM",
+        "status": "ACTIVE",
+        "silent": true,
+        "photoCount": 2,
+        "location": {
+          "floor": "G",
+          "room": null,
+          "zone": "POOL"
+        },
+        "reportedBy": {
+          "role": "GUEST",
+          "name": "Anonymous",
+          "device": "QR-SOS"
+        },
+        "timestamps": {
+          "reported": "2024-01-15T14:40:00Z",
+          "acknowledged": null,
+          "resolved": null
+        },
+        "description": "Suspicious activity near the pool area",
+        "assignedRoles": ["SECURITY", "MANAGER"],
+        "auditLog": {
+          "log_003": {
+            "timestamp": "2024-01-15T14:40:00Z",
+            "actor": "SYSTEM",
+            "action": "INCIDENT_CREATED",
+            "detail": "Alert received via Web SOS"
+          }
+        }
+      }
+    },
+
+    "staff": {
+      "staff_001": {
+        "id": "staff_001",
+        "name": "Rajesh Kumar",
+        "role": "SECURITY",
+        "floor": 3,
+        "status": "ON_DUTY",
+        "fcmToken": "fcm-token-here",
+        "currentIncident": "INC-001",
+        "location": {
+          "floor": 3,
+          "lastUpdated": "2024-01-15T14:33:00Z"
+        }
+      },
+      "staff_002": {
+        "id": "staff_002",
+        "name": "Priya Sharma",
+        "role": "MANAGER",
+        "floor": 0,
+        "status": "ON_DUTY",
+        "fcmToken": "fcm-token-here",
+        "currentIncident": null,
+        "location": {
+          "floor": 0,
+          "lastUpdated": "2024-01-15T14:30:00Z"
+        }
+      },
+      "staff_003": {
+        "id": "staff_003",
+        "name": "Dr. Anita Verma",
+        "role": "MEDICAL",
+        "floor": 1,
+        "status": "ON_DUTY",
+        "fcmToken": "fcm-token-here",
+        "currentIncident": null,
+        "location": {
+          "floor": 1,
+          "lastUpdated": "2024-01-15T14:31:00Z"
+        }
+      }
+    },
+
+    "hotel": {
+      "name": "Grand Horizon Hotel",
+      "totalFloors": 10,
+      "totalRooms": 200,
+      "floors": {
+        "3": {
+          "guestCount": 47,
+          "rooms": ["301","302","303","304","305"],
+          "emergencyExits": ["East Stairwell", "West Stairwell"]
+        }
+      }
+    },
+
+    "dashboard": {
+      "activeIncidents": 1,
+      "lastUpdated": "2024-01-15T14:33:00Z",
+      "systemStatus": "ALERT"
+    }
+
+  }
+}

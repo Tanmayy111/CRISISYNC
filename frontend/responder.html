@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no" />
+  <title>CrisisSync — Responder View</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0a0a0a;
+      --s1: #141414;
+      --s2: #1c1c1c;
+      --bl: #3b82f6;
+      --bl-dk: #2563eb;
+      --bl-lt: #60a5fa;
+      --red: #dc2626;
+      --org: #f59e0b;
+      --gr: #16a34a;
+      --tx: #f0f0f0;
+      --mu: rgba(240, 240, 240, .38);
+      --mu2: rgba(240, 240, 240, .6);
+      --rr: 12px;
+      --b0: rgba(255, 255, 255, .06);
+      --b1: rgba(255, 255, 255, .12);
+    }
+
+    body {
+      font-family: 'Barlow', sans-serif;
+      background: var(--bg);
+      color: var(--tx);
+      min-height: 100dvh;
+      margin: 0 auto;
+      max-width: 600px;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 40px;
+    }
+
+    .h-cond {
+      font-family: 'Barlow Condensed', sans-serif;
+    }
+
+    /* Nav Bar */
+    nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--b0);
+      background: var(--s1);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .logo {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 800;
+      font-size: 22px;
+      letter-spacing: 3px;
+      color: var(--bl);
+      line-height: 1;
+    }
+
+    .sub {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--mu2);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+
+    .clock-wrap {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Barlow', monospace;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .live {
+      width: 6px;
+      height: 6px;
+      background: var(--gr);
+      border-radius: 50%;
+      box-shadow: 0 0 5px var(--gr);
+    }
+
+    /* Status Pill */
+    .status-pill {
+      background: var(--b1);
+      color: var(--tx);
+      text-align: center;
+      padding: 14px;
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s;
+    }
+
+    .status-pill.on-route {
+      background: var(--org);
+      color: white;
+    }
+
+    .status-pill.on-scene {
+      background: var(--bl);
+      color: white;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--s2);
+      border: 1.5px solid var(--b0);
+      border-radius: var(--rr);
+      margin: 16px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card-header {
+      font-family: 'Barlow Condensed', sans-serif;
+      color: var(--bl);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: space-between;
+    }
+
+    /* Incident Brief */
+    .ib-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .ib-type {
+      font-size: 38px;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+
+    .ib-badges {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .ib-sev {
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    .ib-id {
+      color: var(--mu2);
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .sev-HIGH {
+      background: var(--red);
+      color: white;
+    }
+
+    .sev-MEDIUM {
+      background: var(--org);
+      color: white;
+    }
+
+    .sev-LOW {
+      background: var(--gr);
+      color: white;
+    }
+
+    .ib-loc {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--mu2);
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .ib-time {
+      font-size: 14px;
+      color: var(--mu);
+      margin-top: 4px;
+    }
+
+    .ib-silent {
+      background: rgba(220, 38, 38, 0.15);
+      color: var(--red);
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: bold;
+      border: 1.5px solid rgba(220, 38, 38, 0.4);
+      text-align: center;
+      letter-spacing: 1px;
+      display: none;
+    }
+
+    .ib-desc {
+      background: var(--s1);
+      padding: 14px;
+      border-radius: 8px;
+      font-size: 15px;
+      border: 1px solid var(--b0);
+      line-height: 1.5;
+    }
+
+    /* AI Assistant */
+    .pulse-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--bl);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+      }
+
+      70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+      }
+    }
+
+    .chat-box {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .msg {
+      padding: 12px 14px;
+      border-radius: var(--rr);
+      max-width: 90%;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .msg.ai {
+      align-self: flex-start;
+      background: var(--s1);
+      border: 1px solid var(--b0);
+    }
+
+    .msg.user {
+      align-self: flex-end;
+      background: var(--bl);
+      color: white;
+    }
+
+    .chat-input-wrap {
+      display: flex;
+      gap: 8px;
+      margin-top: 5px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      background: var(--s1);
+      border: 1.5px solid var(--b0);
+      color: var(--tx);
+      border-radius: var(--rr);
+      padding: 14px;
+      font-family: 'Barlow', sans-serif;
+      font-size: 15px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input[type="text"]:focus {
+      border-color: var(--bl);
+    }
+
+    /* Buttons */
+    button {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      border-radius: var(--rr);
+      border: none;
+      cursor: pointer;
+      padding: 16px;
+      font-size: 18px;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+
+    button:active {
+      transform: scale(0.97);
+    }
+
+    .btn-blue {
+      background: var(--bl);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-green {
+      background: var(--gr);
+      color: white;
+      width: 100%;
+    }
+
+    .btn-red-out {
+      background: transparent;
+      border: 1.5px solid var(--red);
+      color: var(--red);
+      width: 100%;
+    }
+
+    .btn-mu {
+      background: var(--b1);
+      color: var(--tx);
+      width: 100%;
+      font-size: 16px;
+    }
+
+    #chat-send {
+      background: var(--bl);
+      color: white;
+      padding: 0 20px;
+      border-radius: var(--rr);
+    }
+
+    /* Navigation */
+    #nav-steps {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-step {
+      display: flex;
+      gap: 14px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--b0);
+      align-items: center;
+    }
+
+    .nav-step:last-child {
+      border-bottom: none;
+    }
+
+    .nav-arrow {
+      font-size: 22px;
+      font-weight: bold;
+      color: var(--gr);
+      width: 24px;
+      text-align: center;
+    }
+
+    .nav-text {
+      flex: 1;
+      font-size: 15px;
+      line-height: 1.4;
+    }
+
+    .safe-dot {
+      width: 10px;
+      height: 10px;
+      background: var(--gr);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--gr);
+      flex-shrink: 0;
+    }
+
+    .route-iframe {
+      width: 100%;
+      height: 400px;
+      border: none;
+      border-radius: 12px;
+      background: var(--s1);
+    }
+
+    /* Fullscreen Nav */
+    .fs-nav {
+      position: fixed;
+      inset: 0;
+      background: #052e16;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: white;
+      padding: 20px;
+    }
+
+    .fs-top {
+      width: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .fs-dir {
+      font-size: 160px;
+      font-weight: bold;
+      margin-bottom: 30px;
+      line-height: 1;
+      animation: float 2s ease-in-out infinite;
+      color: #4ade80;
+    }
+
+    @keyframes float {
+      0% {
+        transform: translateY(0px);
+      }
+
+      50% {
+        transform: translateY(-15px);
+      }
+
+      100% {
+        transform: translateY(0px);
+      }
+    }
+
+    .fs-text {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 46px;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .fs-counter {
+      font-size: 18px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 50px;
+      font-weight: 500;
+    }
+
+    /* Actions */
+    .actions {
+      margin: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    #resolve-wrap {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Report Card */
+    .report-card {
+      margin-top: 30px;
+    }
+
+    .report-header {
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .report-body {
+      margin-top: 16px;
+      border-top: 1px solid var(--b0);
+      padding-top: 16px;
+      display: none;
+    }
+
+    #report-content {
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: var(--mu2);
+    }
+
+    #report-content strong {
+      color: var(--tx);
+    }
+
+    /* Print Styles */
+    /* ── Crowd Alerts Nearby ── */
+    .crowd-zone-card {
+      background: var(--s1);
+      border: 1px solid var(--b0);
+      border-radius: 8px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .crowd-zone-card.high {
+      border-left: 3px solid var(--red);
+      background: rgba(220,38,38,0.06);
+    }
+    .crowd-zone-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .crowd-zone-name {
+      font-weight: 600;
+      font-size: 15px;
+    }
+    .crowd-risk-badge {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: 'Barlow Condensed', sans-serif;
+      letter-spacing: 1px;
+    }
+    .crowd-risk-badge.low    { background: rgba(22,163,74,0.2);  color: #4ade80; }
+    .crowd-risk-badge.medium { background: rgba(245,158,11,0.2); color: #fbbf24; }
+    .crowd-risk-badge.high   { background: rgba(220,38,38,0.2);  color: #f87171; }
+    .crowd-meta {
+      font-size: 13px;
+      color: var(--mu2);
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .crowd-trend-up   { color: #f87171; }
+    .crowd-trend-down { color: #4ade80; }
+    .crowd-suggestion-box {
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.3);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13px;
+      color: var(--bl-lt);
+    }
+    .crowd-suggestion-label {
+      font-family: 'Barlow Condensed', sans-serif;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--bl);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+    .crowd-empty {
+      color: var(--mu);
+      font-size: 14px;
+      text-align: center;
+      padding: 10px 0;
+    }
+
+    @media print {
+      body {
+        background: white;
+        color: black;
+        box-shadow: none;
+        max-width: 100%;
+      }
+
+      .status-pill,
+      nav,
+      #ai-assistant,
+      #nav-panel,
+      .actions,
+      .pulse-dot {
+        display: none !important;
+      }
+
+      .card {
+        border: none;
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+      }
+
+      .report-card {
+        display: block !important;
+        margin: 0;
+      }
+
+      .report-body {
+        display: block !important;
+        border: none;
+        padding: 0;
+        margin: 0;
+      }
+
+      #btn-dl-report,
+      .chev {
+        display: none !important;
+      }
+
+      #report-content {
+        color: black;
+        font-size: 12pt;
+      }
+
+      #report-content strong {
+        color: black;
+      }
+
+      .ib-desc,
+      .ib-silent {
+        border: 1px solid #ccc;
+        background: transparent;
+        color: black;
+      }
+
+      .ib-id,
+      .ib-loc,
+      .ib-time {
+        color: #555;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <nav>
+    <div>
+      <div class="logo">CRISISSYNC</div>
+      <div class="sub">RESPONDER VIEW</div>
+    </div>
+    <div class="clock-wrap">
+      <span id="clock">--:--:--</span>
+      <div class="dot live"></div>
+    </div>
+  </nav>
+
+  <div class="status-pill" id="status-pill">STANDBY</div>
+
+  <main id="main-content">
+
+    <!-- Incident Brief -->
+    <section class="card" id="incident-brief">
+      <div class="ib-top">
+        <div>
+          <div class="ib-type h-cond" id="ib-type">--</div>
+          <div class="ib-badges">
+            <span class="ib-sev sev-MEDIUM" id="ib-sev">--</span>
+            <span class="ib-id" id="ib-id">--</span>
+          </div>
+        </div>
+      </div>
+      <div class="ib-silent" id="ib-silent">⚠️ SILENT ALERT ACTIVE</div>
+      <div>
+        <div class="ib-loc">📍 <span id="ib-loc-text">--</span></div>
+        <div class="ib-time" id="ib-time">-- elapsed</div>
+      </div>
+      <div class="ib-desc" id="ib-desc">--</div>
+    </section>
+
+    <!-- AI Assistant -->
+    <section class="card" id="ai-assistant">
+      <div class="card-header">
+        <div style="display:flex; align-items:center; gap:8px;">AI ASSISTANT <div class="pulse-dot"></div>
+        </div>
+      </div>
+      <div class="chat-box" id="chat-box">
+        <div style="text-align:center; padding:10px;"><button id="btn-brief-me" class="btn-blue"
+            style="font-size:14px; padding:10px; max-width:200px; display:inline-block;">BRIEF ME</button></div>
+      </div>
+      <div class="chat-input-wrap">
+        <input type="text" id="chat-input" placeholder="Ask AI Assistant...">
+        <button id="chat-send">SEND</button>
+      </div>
+    </section>
+
+    <!-- Crowd Alerts Nearby -->
+    <section class="card" id="crowd-alerts-section">
+      <div class="card-header">CROWD ALERTS NEARBY</div>
+      <div id="crowd-alerts-list">
+        <div class="crowd-empty">Loading crowd data...</div>
+      </div>
+    </section>
+
+    <!-- Navigation Panel -->
+    <section class="card" id="nav-panel">
+      <div class="card-header" style="color: var(--gr);">ROUTE TO INCIDENT</div>
+      <iframe id="route-iframe" class="route-iframe" src="" title="Floor Plan Navigation"></iframe>
+      <button id="start-nav-btn" class="btn-green">START NAVIGATION</button>
+    </section>
+
+    <!-- Actions -->
+    <section class="actions">
+      <button id="btn-scene" class="btn-blue">MARK ON SCENE</button>
+      <div id="resolve-wrap">
+        <input type="text" id="resolve-note" placeholder="Resolution notes...">
+        <button id="btn-resolve" class="btn-green">MARK RESOLVED</button>
+      </div>
+      <button id="btn-backup" class="btn-red-out">REQUEST BACKUP</button>
+    </section>
+
+    <!-- Report -->
+    <section class="card report-card">
+      <div class="card-header report-header" id="report-toggle">
+        INCIDENT REPORT <span class="chev">▼</span>
+      </div>
+      <div class="report-body" id="report-body">
+        <div id="report-content">Generating report...</div>
+        <button id="btn-dl-report" class="btn-mu">DOWNLOAD PDF</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Fullscreen Navigation -->
+  <div id="fullscreen-nav" class="fs-nav" style="display:none;">
+    <div class="fs-top">
+      <button id="btn-exit-nav"
+        style="background: rgba(255,255,255,0.15); color: white; padding: 10px 16px; font-size: 14px; border-radius: 8px;">EXIT
+        NAVIGATION</button>
+    </div>
+    <div class="fs-dir" id="fs-dir">↑</div>
+    <div class="fs-text" id="fs-text">--</div>
+    <div class="fs-counter" id="fs-counter">--</div>
+    <button id="btn-next-step" class="btn-green" style="width: 85%; max-width: 320px;">NEXT STEP</button>
+  </div>
+
+  <script>
+    const DEMO_MODE = true;
+    // Gemini is proxied through the server — no API key needed in the browser
+
+    const mockIncident = {
+      incidentId: 'CS-A1B2C',
+      type: 'FIRE',
+      location: 'ROOM',
+      locationDetail: '302',
+      floor: '3',
+      silent: false,
+      description: 'Smoke detected near room 302',
+      device: 'QR-SOS',
+      timestamp: new Date().toISOString(),
+      status: 'ACKNOWLEDGED',
+      assignedResponder: { id: 'R03', name: 'Ramesh Gupta', role: 'Fire Safety' }
+    };
+
+    // State
+    let currentStatus = 'STANDBY';
+    let navSteps = [];
+    let currentStepIdx = 0;
+    let reportGenerated = false;
+
+    // Utility: Gemini API Call (proxied through server)
+    async function callGemini(prompt, systemPrompt = "", mode = '') {
+      try {
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ incident: mockIncident, message: prompt, mode })
+        });
+        const data = await res.json();
+        if (!data.success) throw new Error(data.error || 'AI error');
+        return data.response;
+      } catch (e) {
+        console.error('AI chat error:', e);
+        return 'AI unavailable — please retry';
+      }
+    }
+
+    function formatText(text) {
+      return text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    }
+
+    // Initialization
+    window.onload = () => {
+      initClock();
+      initIncidentBrief();
+      setupEventListeners();
+    };
+
+    async function pregenerateReport() {
+      if (reportGenerated) return;
+      const sys = "You are a crisis reporting AI. Be professional.";
+      const prompt = `Generate a full incident report based on this mock data: ${JSON.stringify(mockIncident)}. Include Summary, Timeline, Actions Taken, Recommended Follow-up.`;
+      const res = await callGemini(prompt, sys);
+      document.getElementById('report-content').innerHTML = formatText(res);
+      reportGenerated = true;
+    }
+
+    function initClock() {
+      setInterval(() => {
+        document.getElementById('clock').textContent = new Date().toLocaleTimeString('en-US', { hour12: false });
+      }, 1000);
+
+      setInterval(() => {
+        const diff = Math.floor((new Date() - new Date(mockIncident.timestamp)) / 1000);
+        const m = Math.floor(diff / 60);
+        const s = diff % 60;
+        document.getElementById('ib-time').textContent = `${m}m ${s}s elapsed`;
+      }, 1000);
+    }
+
+    function initIncidentBrief() {
+      document.getElementById('ib-type').textContent = mockIncident.type;
+      document.getElementById('ib-id').textContent = mockIncident.incidentId;
+      document.getElementById('ib-loc-text').textContent = `Floor ${mockIncident.floor} · ${mockIncident.location} · ${mockIncident.locationDetail}`;
+      document.getElementById('ib-desc').textContent = mockIncident.description;
+
+      const sevMap = { 'FIRE': 'HIGH', 'EVACUATION': 'HIGH', 'MEDICAL': 'HIGH', 'ASSAULT': 'HIGH', 'HAZMAT': 'HIGH' };
+      const sev = sevMap[mockIncident.type] || 'MEDIUM';
+      const sevEl = document.getElementById('ib-sev');
+      sevEl.textContent = sev;
+      sevEl.className = 'ib-sev sev-' + sev;
+
+      if (mockIncident.silent) {
+        document.getElementById('ib-silent').style.display = 'block';
+      }
+    }
+
+    async function initAI() {
+      document.getElementById('chat-box').innerHTML = '<div class="msg ai" id="ai-loading">Analyzing incident details...</div>';
+      const sys = "You are an emergency response assistant for a hotel crisis. Be extremely concise, direct, and actionable. Never give long paragraphs. Use short numbered steps. Responder's safety is top priority.";
+      const prompt = `Incident: ${JSON.stringify(mockIncident)}. Provide a 2 line situation summary. Then top 3 immediate actions. Mention specific warnings if applicable.`;
+      const res = await callGemini(prompt, sys);
+      const loading = document.getElementById('ai-loading');
+      if (loading) loading.remove();
+      addMsg('ai', res);
+    }
+
+    function addMsg(role, text) {
+      const chatBox = document.getElementById('chat-box');
+      const d = document.createElement('div');
+      d.className = `msg ${role}`;
+      d.innerHTML = formatText(text);
+      chatBox.appendChild(d);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function getFloorplanURL() {
+      const params = new URLSearchParams();
+      if (mockIncident.floor) params.set('floor', mockIncident.floor);
+      if (mockIncident.locationDetail) params.set('room', mockIncident.locationDetail);
+      if (mockIncident.type) params.set('type', mockIncident.type);
+      params.set('mode', 'respond');
+      return 'floorplan.html?' + params.toString();
+    }
+
+    function initRouteIframe() {
+      document.getElementById('route-iframe').src = getFloorplanURL();
+    }
+
+    function setupEventListeners() {
+      document.getElementById('btn-brief-me').onclick = initAI;
+      initRouteIframe();
+
+      // Chat
+      document.getElementById('chat-send').onclick = async () => {
+        const inp = document.getElementById('chat-input');
+        const text = inp.value.trim();
+        if (!text) return;
+        addMsg('user', text);
+        inp.value = '';
+
+        const d = document.createElement('div');
+        d.className = `msg ai`;
+        d.id = 'ai-typing';
+        d.textContent = 'Thinking...';
+        document.getElementById('chat-box').appendChild(d);
+
+        const sys = "You are an emergency response assistant for a hotel crisis. Be extremely concise, direct, and actionable. Never give long paragraphs. Use short numbered steps. Responder's safety is top priority.";
+        const prompt = `Incident context: ${JSON.stringify(mockIncident)}. Responder asks: "${text}". Answer concisely.`;
+        const res = await callGemini(prompt, sys);
+
+        document.getElementById('ai-typing').remove();
+        addMsg('ai', res);
+      };
+
+      // Open floorplan in new tab for fullscreen navigation
+      document.getElementById('start-nav-btn').onclick = () => {
+        window.open(getFloorplanURL(), '_blank');
+      };
+
+      document.getElementById('btn-exit-nav').onclick = () => {
+        document.getElementById('fullscreen-nav').style.display = 'none';
+      };
+
+      document.getElementById('btn-next-step').onclick = () => {
+        if (currentStepIdx < navSteps.length - 1) {
+          currentStepIdx++;
+          updateFsNav();
+        } else {
+          document.getElementById('fullscreen-nav').style.display = 'none';
+          setStatus('ON SCENE');
+        }
+      };
+
+      // Status Pill Cycle
+      const pill = document.getElementById('status-pill');
+      pill.onclick = () => {
+        if (currentStatus === 'STANDBY') setStatus('ON ROUTE');
+        else if (currentStatus === 'ON ROUTE') setStatus('ON SCENE');
+        else if (currentStatus === 'ON SCENE') setStatus('STANDBY');
+
+        // In real app, update Firebase here
+      };
+
+      // Action Buttons
+      document.getElementById('btn-scene').onclick = () => setStatus('ON SCENE');
+
+      document.getElementById('btn-resolve').onclick = () => {
+        document.getElementById('main-content').innerHTML = `
+          <div style="text-align:center; padding: 80px 20px;">
+            <div style="font-size: 100px; color: var(--gr); margin-bottom: 20px;">✔</div>
+            <div class="h-cond" style="font-size: 38px; color: var(--tx);">INCIDENT CLOSED</div>
+            <div style="color: var(--mu2); margin-top: 15px; font-size: 18px;">${new Date().toLocaleString()}</div>
+          </div>
+        `;
+      };
+
+      document.getElementById('btn-backup').onclick = () => {
+        alert("Backup requested! HIGH severity EVACUATION incident dispatched to Firebase.");
+      };
+
+      // Report Accordion
+      document.getElementById('report-toggle').onclick = async () => {
+        const b = document.getElementById('report-body');
+        const chev = document.querySelector('#report-toggle .chev');
+        if (b.style.display === 'none' || b.style.display === '') {
+          b.style.display = 'block';
+          chev.textContent = '▲';
+          if (!reportGenerated) {
+            document.getElementById('report-content').innerHTML = "Generating report...";
+            await pregenerateReport();
+          }
+        } else {
+          b.style.display = 'none';
+          chev.textContent = '▼';
+        }
+      };
+
+      document.getElementById('btn-dl-report').onclick = () => window.print();
+    }
+
+    function updateFsNav() {
+      const s = navSteps[currentStepIdx];
+      document.getElementById('fs-text').textContent = s.text;
+      document.getElementById('fs-dir').textContent = s.arrow || '→';
+      document.getElementById('fs-counter').textContent = `Step ${currentStepIdx + 1} of ${navSteps.length}`;
+      document.getElementById('btn-next-step').textContent = currentStepIdx === navSteps.length - 1 ? "ARRIVED AT SCENE" : "NEXT STEP";
+    }
+
+    function setStatus(status) {
+      currentStatus = status;
+      const pill = document.getElementById('status-pill');
+      pill.textContent = status;
+      pill.className = 'status-pill ' + status.toLowerCase().replace(' ', '-');
+
+      if (status === 'ON SCENE') {
+        document.getElementById('btn-scene').style.display = 'none';
+        document.getElementById('resolve-wrap').style.display = 'flex';
+      } else {
+        document.getElementById('btn-scene').style.display = 'block';
+        document.getElementById('resolve-wrap').style.display = 'none';
+      }
+    }
+
+    // ── Crowd Alerts Nearby ────────────────────────────────────────────
+    function refreshCrowdAlerts(zones) {
+      const list = document.getElementById('crowd-alerts-list');
+      if (!list) return;
+      const allZones = zones || (window.CrowdEngine ? window.CrowdEngine.getZones() : []);
+      const floorZones = allZones.filter(z => z.floor === mockIncident.floor);
+
+      if (floorZones.length === 0) {
+        list.innerHTML = '<div class="crowd-empty">No crowd alerts on this floor</div>';
+        return;
+      }
+
+      list.innerHTML = floorZones.map(z => {
+        const riskClass = z.riskLevel.toLowerCase();
+        const trendHtml = z.trend === 'INCREASING'
+          ? '<span class="crowd-trend-up">↑ INCREASING</span>'
+          : z.trend === 'DECREASING'
+            ? '<span class="crowd-trend-down">↓ DECREASING</span>'
+            : '<span style="color:var(--mu2);">→ STABLE</span>';
+        const suggHtml = z.riskLevel === 'HIGH' && z.geminiSuggestion
+          ? `<div class="crowd-suggestion-box"><div class="crowd-suggestion-label">Suggested Action</div>${z.geminiSuggestion}</div>`
+          : '';
+        return `
+          <div class="crowd-zone-card ${z.riskLevel === 'HIGH' ? 'high' : ''}">
+            <div class="crowd-zone-row">
+              <span class="crowd-zone-name">${z.label}</span>
+              <span class="crowd-risk-badge ${riskClass}">${z.riskLevel}</span>
+            </div>
+            <div class="crowd-meta">
+              <span>${z.density} people</span>
+              ${trendHtml}
+            </div>
+            ${suggHtml}
+          </div>`;
+      }).join('');
+    }
+
+    window.addEventListener('load', () => {
+      if (window.CrowdEngine) {
+        window.CrowdEngine.start();
+        window.CrowdEngine.onUpdate(refreshCrowdAlerts);
+      }
+    });
+  </script>
+  <script src="crowdEngine-browser.js"></script>
+</body>
+
+</html>
