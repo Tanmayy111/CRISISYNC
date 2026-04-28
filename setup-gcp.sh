@@ -3,7 +3,11 @@
 # Run this ONCE to set up your Google Cloud infrastructure
 # Make sure you've run: gcloud auth login && gcloud config set project YOUR_PROJECT_ID
 
-PROJECT_ID="your-gcp-project-id"
+PROJECT_ID="${GCP_PROJECT_ID:-your-gcp-project-id}"
+if [[ "$PROJECT_ID" == "your-gcp-project-id" ]]; then
+  echo "ERROR: Set GCP_PROJECT_ID environment variable before running this script."
+  exit 1
+fi
 REGION="us-central1"
 TOPIC="crisis-alerts"
 SUBSCRIPTION="crisis-dispatch-sub"

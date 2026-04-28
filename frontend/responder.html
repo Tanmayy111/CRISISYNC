@@ -749,6 +749,7 @@
     <button id="btn-next-step" class="btn-green" style="width: 85%; max-width: 320px;">NEXT STEP</button>
   </div>
 
+  <script src="crowdEngine-browser.js"></script>
   <script>
     const DEMO_MODE = true;
     // Gemini is proxied through the server — no API key needed in the browser
@@ -1006,8 +1007,8 @@
           : z.trend === 'DECREASING'
             ? '<span class="crowd-trend-down">↓ DECREASING</span>'
             : '<span style="color:var(--mu2);">→ STABLE</span>';
-        const suggHtml = z.riskLevel === 'HIGH' && z.geminiSuggestion
-          ? `<div class="crowd-suggestion-box"><div class="crowd-suggestion-label">Suggested Action</div>${z.geminiSuggestion}</div>`
+        const suggHtml = z.riskLevel === 'HIGH' && z.suggestion
+          ? `<div class="crowd-suggestion-box"><div class="crowd-suggestion-label">Suggested Action</div>${z.suggestion}</div>`
           : '';
         return `
           <div class="crowd-zone-card ${z.riskLevel === 'HIGH' ? 'high' : ''}">
@@ -1031,7 +1032,6 @@
       }
     });
   </script>
-  <script src="crowdEngine-browser.js"></script>
 </body>
 
 </html>

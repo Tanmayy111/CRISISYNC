@@ -2,7 +2,7 @@
   "name": "crisisync",
   "version": "1.0.0",
   "description": "",
-  "main": "crowdEngine.js",
+  "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
@@ -10,6 +10,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "type": "commonjs",
   "dependencies": {
     "cors": "^2.8.6",

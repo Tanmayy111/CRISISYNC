@@ -1197,6 +1197,7 @@
     </div>
   </div>
 
+  <script src="crowdEngine-browser.js"></script>
   <script>
     const DEMO_MODE = true;
     // Gemini is proxied through the server — no API key needed in the browser
@@ -1286,7 +1287,7 @@
               ${trendText}
               <span class="crowd-risk ${z.riskLevel.toLowerCase()}">${z.riskLevel}</span>
             </div>
-            ${z.riskLevel === 'HIGH' && z.geminiSuggestion ? `<div class="crowd-suggestion">${z.geminiSuggestion}</div>` : ''}
+            ${z.riskLevel === 'HIGH' && z.suggestion ? `<div class="crowd-suggestion">${z.suggestion}</div>` : ''}
           </div>
         `;
       });
@@ -1788,7 +1789,6 @@
     };
 
   </script>
-  <script src="crowdEngine-browser.js"></script>
 </body>
 
 </html>

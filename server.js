@@ -10,11 +10,13 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.static("frontend"));
+app.get('/', (req, res) => res.redirect('/dashboard.html'));
 
 // ─── Configuration ──────────────────────────────────────────────────────────
 
-const DEMO_MODE = true;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "AIzaSyAQL3h_KnzJVRpeNL9SaLu0noLdbAoV0r0";
+const DEMO_MODE = process.env.DEMO_MODE !== 'false'; // default true; set DEMO_MODE=false for production
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+if (!GEMINI_API_KEY) console.warn('[WARNING] GEMINI_API_KEY not set — AI features will return fallbacks.');
 const GEMINI_MODEL = "gemini-2.0-flash-lite";
 const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 const PORT = process.env.PORT || 3000;

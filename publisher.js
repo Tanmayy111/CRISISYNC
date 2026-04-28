@@ -5,7 +5,7 @@
 const { PubSub } = require("@google-cloud/pubsub");
 const admin = require("firebase-admin");
 
-const pubsub = new PubSub({ projectId: "your-gcp-project-id" });
+const pubsub = new PubSub({ projectId: process.env.GCP_PROJECT_ID || "your-gcp-project-id" });
 const TOPIC_NAME = "crisis-alerts";
 
 // ─── Main Publisher Function ───────────────────────────────────────────────
